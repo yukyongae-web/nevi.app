@@ -1,0 +1,12 @@
+# Secret vars (Claude API Key)
+.dev.vars
+
+# Wrangler build and cache directories
+.wrangler/
+
+# Dependency directories
+node_modules/
+
+# OS metadata
+.DS_Store
+Thumbs.db

@@ -1,0 +1,2299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NEVI — AI 인생 내비게이터</title>
+  <meta name="description" content="AI와 함께 찾는 다음 한 걸음. 5060 세대를 위한 따뜻하고 간결한 인생 내비게이터">
+  
+  <!-- Google Fonts 로드 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* CSS 디자인 시스템 */
+    :root {
+      --bg-color: #0E1117;
+      --primary-color: #7C6AF7;
+      --primary-hover: #9687FA;
+      --success-color: #7AD88D;
+      --success-hover: #98E5A7;
+      --danger-color: #FF6B6B;
+      --card-bg: rgba(255, 255, 255, 0.04);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-border-active: rgba(124, 106, 247, 0.6);
+      --text-main: #FFFFFF;
+      --text-muted: #9AA0A6;
+      --text-dark: #0E1117;
+      --shadow-color: rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #05070A;
+      color: var(--text-main);
+      font-family: 'Noto Sans KR', 'Inter', sans-serif;
+      font-size: 18px; /* 5060 세대를 위한 글씨 최소 18px */
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+    }
+
+    /* 모바일 우선 컨테이너 (최대 480px) */
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      background-color: var(--bg-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: 0 0 32px var(--shadow-color);
+      padding: 24px 20px 100px 20px; /* 하단 탭바 영역 확보를 위해 하단 패딩 넉넉히 */
+      overflow-y: auto;
+    }
+
+    /* 헤더 영역 */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .app-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #FFF, var(--primary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-logo-dot {
+      width: 10px;
+      height: 10px;
+      background-color: var(--primary-color);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--primary-color);
+    }
+
+    .app-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* 화면 전환 기본 설정 */
+    .screen {
+      display: none;
+      flex-direction: column;
+      flex-grow: 1;
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 글래스모피즘 카드 스타일 */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* 타이틀 및 가이드 텍스트 */
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .description-text {
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      word-break: keep-all;
+    }
+
+    /* 공통 버튼 디자인 (높이 52px로 최소 터치 영역 확보) */
+    .btn {
+      font-family: inherit;
+      font-size: 19px;
+      font-weight: 700;
+      height: 54px;
+      padding: 0 24px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 100%;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: var(--text-main);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 0 16px rgba(124, 106, 247, 0.4);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      border: 2px solid var(--card-border);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      color: var(--text-dark);
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background-color: var(--success-hover);
+      box-shadow: 0 0 16px rgba(122, 216, 141, 0.4);
+    }
+
+    /* S0. 스플래시 화면 특화 스타일 */
+    .splash-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      flex-grow: 1;
+      padding: 20px 10px;
+    }
+
+    .splash-logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--primary-color), #5A49D6);
+      border-radius: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 32px;
+      box-shadow: 0 8px 24px rgba(124, 106, 247, 0.3);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 8px 24px rgba(124, 106, 247, 0.3); }
+      50% { transform: scale(1.05); box-shadow: 0 8px 32px rgba(124, 106, 247, 0.5); }
+      100% { transform: scale(1); box-shadow: 0 8px 24px rgba(124, 106, 247, 0.3); }
+    }
+
+    .splash-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -1px;
+    }
+
+    .splash-slogan {
+      font-size: 19px;
+      color: var(--primary-color);
+      font-weight: 500;
+      margin-bottom: 40px;
+    }
+
+    .splash-desc-box {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 48px;
+      line-height: 1.6;
+    }
+
+    /* S1. 상태 입력 단계별 Wizard 구조 */
+    .wizard-progress {
+      height: 6px;
+      background-color: var(--card-border);
+      border-radius: 3px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .wizard-progress-bar {
+      height: 100%;
+      width: 25%;
+      background-color: var(--primary-color);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 8px var(--primary-color);
+    }
+
+    .step-container {
+      display: none;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .step-container.active {
+      display: flex;
+      animation: slideIn 0.3s ease-out forwards;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* 라디오 / 체크박스 선택용 카드 형태 */
+    .selectable-card {
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      border-radius: 16px;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .selectable-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* 선택된 카드 상태 */
+    .selectable-card:has(input:checked) {
+      border-color: var(--primary-color);
+      background-color: rgba(124, 106, 247, 0.08);
+      box-shadow: 0 0 12px rgba(124, 106, 247, 0.15);
+    }
+
+    .selectable-card-custom-indicator {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--card-border);
+      border-radius: 50%;
+      margin-right: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .selectable-card:has(input:checked) .selectable-card-custom-indicator {
+      border-color: var(--primary-color);
+      background-color: var(--primary-color);
+    }
+
+    .selectable-card:has(input:checked) .selectable-card-custom-indicator::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      background-color: var(--text-main);
+      border-radius: 50%;
+    }
+
+    /* 체크박스용 사각형 인디케이터 */
+    .selectable-card.checkbox-type .selectable-card-custom-indicator {
+      border-radius: 6px;
+    }
+
+    .selectable-card.checkbox-type:has(input:checked) .selectable-card-custom-indicator::after {
+      content: "✓";
+      color: var(--text-main);
+      font-size: 14px;
+      font-weight: 700;
+      background: transparent;
+      border-radius: 0;
+    }
+
+    .selectable-card input[type="radio"],
+    .selectable-card input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+
+    .selectable-card-text {
+      font-size: 19px;
+      font-weight: 500;
+    }
+
+    /* 기분 이모지 그리드 */
+    .mood-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .mood-card {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 24px 16px;
+      border-radius: 16px;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mood-card.selected {
+      border-color: var(--primary-color);
+      background-color: rgba(124, 106, 247, 0.08);
+    }
+
+    .mood-emoji {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .mood-label {
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .wizard-buttons {
+      margin-top: auto;
+      padding-top: 20px;
+      display: flex;
+      gap: 12px;
+    }
+
+    /* S2. AI 분석 중 (로딩 화면) */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      flex-grow: 1;
+      padding: 40px 10px;
+    }
+
+    .loading-animation {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 32px;
+      margin-bottom: 32px;
+    }
+
+    .loading-dot {
+      width: 18px;
+      height: 18px;
+      background-color: var(--primary-color);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+      box-shadow: 0 0 10px var(--primary-color);
+    }
+
+    .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.3); opacity: 0.3; }
+      40% { transform: scale(1.1); opacity: 1; }
+    }
+
+    .loading-text {
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text-main);
+      word-break: keep-all;
+    }
+
+    /* S3. 결과 카드 */
+    .result-context {
+      font-size: 19px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.6;
+      word-break: keep-all;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 16px;
+      border-radius: 12px;
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .action-card {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      border-radius: 16px;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .action-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .action-card.selected {
+      border-color: var(--success-color);
+      background-color: rgba(122, 216, 141, 0.06);
+      box-shadow: 0 0 12px rgba(122, 216, 141, 0.15);
+    }
+
+    .action-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .time-badge {
+      font-size: 15px;
+      font-weight: 700;
+      background-color: var(--primary-color);
+      color: var(--text-main);
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .action-card.selected .time-badge {
+      background-color: var(--success-color);
+      color: var(--text-dark);
+    }
+
+    .action-text {
+      font-size: 19px;
+      font-weight: 500;
+      line-height: 1.5;
+      word-break: keep-all;
+    }
+
+    .action-select-indicator {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--card-border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .action-card.selected .action-select-indicator {
+      border-color: var(--success-color);
+      background-color: var(--success-color);
+    }
+
+    .action-card.selected .action-select-indicator::after {
+      content: "✓";
+      color: var(--text-dark);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    /* S4. 행동 저장 애니메이션 */
+    .save-animation-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      flex-grow: 1;
+      text-align: center;
+      padding: 40px 10px;
+    }
+
+    .save-icon-circle {
+      width: 72px;
+      height: 72px;
+      background-color: var(--success-color);
+      color: var(--text-dark);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      box-shadow: 0 0 20px rgba(122, 216, 141, 0.4);
+      animation: checkPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes checkPop {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* S5. 회고 화면 */
+    .retro-question-box {
+      text-align: center;
+      padding: 12px 0 24px 0;
+    }
+
+    .retro-choice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .retro-choice-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 8px;
+      border-radius: 16px;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .retro-choice-btn:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .retro-choice-btn.selected {
+      border-color: var(--primary-color);
+      background-color: rgba(124, 106, 247, 0.08);
+    }
+
+    .retro-choice-emoji {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .retro-choice-label {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    /* "못 했다" 상세 사유 영역 */
+    .retro-reason-container {
+      display: none;
+      animation: fadeIn 0.3s ease-out forwards;
+      margin-top: 10px;
+      margin-bottom: 24px;
+    }
+
+    .retro-reason-container.active {
+      display: block;
+    }
+
+    .retro-reason-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* AI 격려 피드백 결과 카드 */
+    .retro-feedback-card {
+      display: none;
+      animation: fadeIn 0.4s ease-out forwards;
+      border-left: 4px solid var(--success-color);
+      background-color: rgba(122, 216, 141, 0.03);
+    }
+
+    .retro-feedback-card.active {
+      display: block;
+    }
+
+    .feedback-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--success-color);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feedback-message {
+      font-size: 18px;
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+
+    /* S6. 지난 기록 탭 */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .history-card {
+      padding: 20px;
+    }
+
+    .history-date-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 8px;
+    }
+
+    .history-date {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .history-tag {
+      font-size: 14px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 12px;
+      background-color: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+    }
+
+    .history-direction {
+      font-size: 14px;
+      color: var(--primary-color);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .history-action-text {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .history-retro-result {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: rgba(255, 255, 255, 0.03);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    .history-retro-badge {
+      font-size: 18px;
+    }
+
+    .history-empty {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--text-muted);
+    }
+
+    /* API 설정 및 정보 카드 */
+    .setting-section {
+      margin-top: 24px;
+    }
+
+    .setting-api-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .status-dot.active {
+      background-color: var(--success-color);
+      box-shadow: 0 0 8px var(--success-color);
+    }
+
+    .status-dot.inactive {
+      background-color: var(--danger-color);
+      box-shadow: 0 0 8px var(--danger-color);
+    }
+
+    /* 하단 고정 탭 바 */
+    .nav-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 76px;
+      background-color: rgba(14, 17, 23, 0.95);
+      border-top: 1px solid var(--card-border);
+      display: none; /* 기본 숨김, 스플래시와 로딩 제외 노출 */
+      justify-content: space-around;
+      align-items: center;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 100;
+    }
+
+    .nav-bar.active {
+      display: flex;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      width: 30%;
+      height: 100%;
+    }
+
+    .nav-item:hover {
+      color: var(--text-main);
+    }
+
+    .nav-item.active {
+      color: var(--primary-color);
+    }
+
+    .nav-icon {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    /* API 키 입력용 모달 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background-color: var(--bg-color);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      max-width: 440px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      animation: modalScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes modalScale {
+      from { transform: scale(0.9); }
+      to { transform: scale(1); }
+    }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .modal-desc {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      word-break: keep-all;
+    }
+
+    .modal-desc a {
+      color: var(--primary-color);
+      text-decoration: underline;
+    }
+
+    .input-field {
+      width: 100%;
+      height: 52px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: var(--text-main);
+      padding: 0 16px;
+      font-size: 16px;
+      font-family: inherit;
+      margin-bottom: 8px;
+      transition: border-color 0.2s ease;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .modal-info-text {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    /* 알림 토스트 */
+    .toast {
+      position: absolute;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background-color: #242936;
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      z-index: 500;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    .toast.active {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- 앱 헤더 -->
+    <header class="app-header" id="app-header">
+      <div class="app-title" id="app-logo-home" style="cursor: pointer; user-select: none;">
+        <span class="app-logo-dot"></span>NEVI
+      </div>
+      <div class="app-subtitle">AI 인생 내비게이터</div>
+    </header>
+
+    <!-- S0. 스플래시 화면 -->
+    <section class="screen active" id="screen-splash">
+      <div class="splash-container">
+        <div class="splash-logo">🧭</div>
+        <h1 class="splash-title">NEVI</h1>
+        <p class="splash-slogan">AI와 함께 찾는 다음 한 걸음</p>
+        
+        <div class="splash-desc-box">
+          <p style="font-size: 20px; font-weight: 500; word-break: keep-all;">
+            "Nevi는 답을 주지 않습니다.<br>오직 당신의 다음 한 걸음만 찾아드립니다."
+          </p>
+        </div>
+
+        <button class="btn btn-primary" id="btn-splash-start">시작하기</button>
+      </div>
+    </section>
+
+    <!-- S1. 상태 입력 화면 -->
+    <section class="screen" id="screen-input">
+      <div class="wizard-progress">
+        <div class="wizard-progress-bar" id="wizard-progress-bar"></div>
+      </div>
+
+      <!-- Step 1: 방향 선택 -->
+      <div class="step-container active" id="step-direction">
+        <h2>어떤 방향으로 나아가고 싶으신가요?</h2>
+        <p class="description-text">현재 가장 관심이 가는 한 가지를 선택해 주세요.</p>
+        
+        <div class="selectable-list">
+          <label class="selectable-card">
+            <input type="radio" name="input-direction" value="새로운 일 시작하기">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">🆕 새로운 일 시작하기</span>
+          </label>
+          <label class="selectable-card">
+            <input type="radio" name="input-direction" value="AI 배우기">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">🤖 AI 배우기</span>
+          </label>
+          <label class="selectable-card">
+            <input type="radio" name="input-direction" value="쉬어가기">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">🌿 쉬어가기</span>
+          </label>
+          <label class="selectable-card">
+            <input type="radio" name="input-direction" value="건강 챙기기">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">💪 건강 챙기기</span>
+          </label>
+          <label class="selectable-card">
+            <input type="radio" name="input-direction" value="나만의 프로젝트 만들기">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">🎨 나만의 프로젝트 만들기</span>
+          </label>
+        </div>
+
+        <div class="wizard-buttons">
+          <button class="btn btn-primary" id="btn-dir-next" disabled>다음 단계로</button>
+        </div>
+      </div>
+
+      <!-- Step 2-1: 관심사 선택 -->
+      <div class="step-container" id="step-interest">
+        <h2>구체적인 관심사가 무엇인가요?</h2>
+        <p class="description-text">여러 개를 선택하셔도 괜찮습니다.</p>
+        
+        <div class="selectable-list">
+          <label class="selectable-card checkbox-type">
+            <input type="checkbox" name="input-interest" value="돈">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">💰 재테크 · 돈</span>
+          </label>
+          <label class="selectable-card checkbox-type">
+            <input type="checkbox" name="input-interest" value="건강">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">🏃 운동 · 건강</span>
+          </label>
+          <label class="selectable-card checkbox-type">
+            <input type="checkbox" name="input-interest" value="취미">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">🎸 여가 · 취미</span>
+          </label>
+          <label class="selectable-card checkbox-type">
+            <input type="checkbox" name="input-interest" value="AI">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">🖥️ 컴퓨터 · AI</span>
+          </label>
+          <label class="selectable-card checkbox-type">
+            <input type="checkbox" name="input-interest" value="유튜브">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">📹 유튜브 · 영상</span>
+          </label>
+          <label class="selectable-card checkbox-type">
+            <input type="checkbox" name="input-interest" value="공부">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">📚 배움 · 공부</span>
+          </label>
+          <label class="selectable-card checkbox-type">
+            <input type="checkbox" name="input-interest" value="여행">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">✈️ 힐링 · 여행</span>
+          </label>
+        </div>
+
+        <div class="wizard-buttons">
+          <button class="btn btn-secondary" id="btn-interest-prev">이전</button>
+          <button class="btn btn-primary" id="btn-interest-next" disabled>다음 단계로</button>
+        </div>
+      </div>
+
+      <!-- Step 2-2: 가능 시간 선택 -->
+      <div class="step-container" id="step-time">
+        <h2>지금 얼마 동안 행동할 수 있으신가요?</h2>
+        <p class="description-text">현실적으로 실천 가능한 시간을 선택해 주세요.</p>
+        
+        <div class="selectable-list">
+          <label class="selectable-card">
+            <input type="radio" name="input-time" value="10분">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">⏱️ 10분</span>
+          </label>
+          <label class="selectable-card">
+            <input type="radio" name="input-time" value="30분">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">⏱️ 30분</span>
+          </label>
+          <label class="selectable-card">
+            <input type="radio" name="input-time" value="1시간">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">⏱️ 1시간</span>
+          </label>
+          <label class="selectable-card">
+            <input type="radio" name="input-time" value="2시간 이상">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">⏱️ 2시간 이상</span>
+          </label>
+        </div>
+
+        <div class="wizard-buttons">
+          <button class="btn btn-secondary" id="btn-time-prev">이전</button>
+          <button class="btn btn-primary" id="btn-time-next" disabled>다음 단계로</button>
+        </div>
+      </div>
+
+      <!-- Step 2-3: 현재 기분 선택 -->
+      <div class="step-container" id="step-mood">
+        <h2>오늘의 현재 마음 상태는 어떤가요?</h2>
+        <p class="description-text">기분에 맞추어 행동의 난이도를 Nevi가 조절합니다.</p>
+        
+        <div class="mood-grid">
+          <div class="mood-card" data-value="괜찮음">
+            <div class="mood-emoji">🙂</div>
+            <div class="mood-label">괜찮음</div>
+          </div>
+          <div class="mood-card" data-value="막막함">
+            <div class="mood-emoji">😐</div>
+            <div class="mood-label">막막함</div>
+          </div>
+          <div class="mood-card" data-value="지침">
+            <div class="mood-emoji">😵</div>
+            <div class="mood-label">지침</div>
+          </div>
+          <div class="mood-card" data-value="의욕적">
+            <div class="mood-emoji">🔥</div>
+            <div class="mood-label">의욕적</div>
+          </div>
+        </div>
+
+        <div class="wizard-buttons">
+          <button class="btn btn-secondary" id="btn-mood-prev">이전</button>
+          <button class="btn btn-primary" id="btn-find-step" disabled>다음 한 걸음 찾기</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- S2. AI 분석 중 (로딩 화면) -->
+    <section class="screen" id="screen-loading">
+      <div class="loading-container">
+        <div class="loading-animation">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+        </div>
+        <div class="loading-text" id="loading-text-content">Nevi가 다음 걸음을 찾고 있어요...</div>
+      </div>
+    </section>
+
+    <!-- S3. 결과 카드 화면 -->
+    <section class="screen" id="screen-result">
+      <h2>오늘의 다음 한 걸음</h2>
+      <div class="result-context" id="result-context-text">
+        당신의 상태와 목표를 분석하여 도출한 맞춤형 안내입니다.
+      </div>
+      
+      <p class="description-text" style="margin-bottom: 16px;">
+        마음에 드는 <strong>한 가지 행동</strong>을 선택해 보세요.
+      </p>
+
+      <div class="action-list" id="result-action-list">
+        <!-- JS로 동적 렌더링 -->
+      </div>
+
+      <div class="wizard-buttons" style="margin-top: 16px;">
+        <button class="btn btn-secondary" id="btn-result-retry" style="flex: 1;">다시 찾기</button>
+        <button class="btn btn-success" id="btn-result-confirm" style="flex: 2;" disabled>오늘 해보기</button>
+      </div>
+    </section>
+
+    <!-- S4. 행동 저장 애니메이션 화면 -->
+    <section class="screen" id="screen-save-success">
+      <div class="save-animation-container">
+        <div class="save-icon-circle">✓</div>
+        <h2 style="margin-bottom: 16px;">오늘의 행동 저장 완료!</h2>
+        <p class="description-text" style="color: var(--text-main); font-weight: 500;">
+          행동이 성공적으로 내비게이터에 기록되었습니다.
+        </p>
+        <p class="description-text" style="font-size: 16px;">
+          현실에서 실천을 마친 뒤에 회고를 작성할 수 있습니다.<br>
+          (잠시 후 회고 화면으로 자동 이동합니다.)
+        </p>
+      </div>
+    </section>
+
+    <!-- S5. 회고 화면 -->
+    <section class="screen" id="screen-retro">
+      <div class="card" style="margin-bottom: 24px;">
+        <div style="font-size: 15px; color: var(--primary-color); font-weight: 700; margin-bottom: 4px;">진행 중인 행동</div>
+        <div id="retro-active-action-text" style="font-size: 20px; font-weight: 700; line-height: 1.4;">
+          유튜브에서 10분 건강 정보 영상 보기
+        </div>
+      </div>
+
+      <div class="retro-question-box">
+        <h2>오늘 행동해 보셨나요?</h2>
+        <p class="description-text" style="margin-bottom: 0;">스스로를 비난하지 않고 사실 그대로 기록하는 것이 중요합니다.</p>
+      </div>
+
+      <div class="retro-choice-grid">
+        <div class="retro-choice-btn" data-value="completed">
+          <span class="retro-choice-emoji">🙂</span>
+          <span class="retro-choice-label">했다</span>
+        </div>
+        <div class="retro-choice-btn" data-value="partial">
+          <span class="retro-choice-emoji">😐</span>
+          <span class="retro-choice-label">조금 했다</span>
+        </div>
+        <div class="retro-choice-btn" data-value="failed">
+          <span class="retro-choice-emoji">🙃</span>
+          <span class="retro-choice-label">못 했다</span>
+        </div>
+      </div>
+
+      <!-- 못했다 선택 시 서브 질문 -->
+      <div class="retro-reason-container" id="retro-reason-container">
+        <h2>행동하지 못한 이유를 가볍게 선택해 주세요.</h2>
+        <p class="description-text">Nevi가 다음 단계에서 더 알맞은 난이도의 한 걸음을 찾을 수 있도록 돕습니다.</p>
+        
+        <div class="retro-reason-grid">
+          <label class="selectable-card">
+            <input type="radio" name="retro-reason" value="바빴다">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">⏳ 오늘 일정이 바빴다</span>
+          </label>
+          <label class="selectable-card">
+            <input type="radio" name="retro-reason" value="막막했다">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">🌫️ 막상 하려니 막막했다</span>
+          </label>
+          <label class="selectable-card">
+            <input type="radio" name="retro-reason" value="관심이 바뀌었다">
+            <span class="selectable-card-custom-indicator"></span>
+            <span class="selectable-card-text">🔄 다른 것에 관심이 생겼다</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- AI 피드백 메시지 영역 -->
+      <div class="card retro-feedback-card" id="retro-feedback-card">
+        <div class="feedback-title">
+          <span>🧭</span> Nevi의 응답
+        </div>
+        <div class="feedback-message" id="retro-feedback-text">
+          조금이라도 움직였다는 사실이 중요합니다. 완벽하지 않아도 괜찮아요. 그 작은 시도 자체가 커다란 용기입니다.
+        </div>
+      </div>
+
+      <div style="margin-top: auto; padding-top: 16px;">
+        <button class="btn btn-primary" id="btn-retro-submit" disabled>회고 완료하기</button>
+      </div>
+    </section>
+
+    <!-- S6. 지난 기록 탭 -->
+    <section class="screen" id="screen-history">
+      <h2 style="margin-bottom: 8px;">지난 기록</h2>
+      <p class="description-text" style="margin-bottom: 24px;">지금까지 내딛은 소중한 한 걸음들의 흔적입니다.</p>
+
+      <div class="history-list" id="history-list-container">
+        <!-- JS로 동적 렌더링 -->
+      </div>
+    </section>
+
+    <!-- S7. API 설정 관리 화면 (별도 탭으로 진입 가능) -->
+    <section class="screen" id="screen-settings">
+      <h2>설정</h2>
+      <p class="description-text">Nevi 앱의 작동을 위한 설정 화면입니다.</p>
+
+      <div class="card">
+        <div class="setting-api-status">
+          <span style="font-weight: 700;">서버 연결 주소 (Worker URL)</span>
+        </div>
+        
+        <p style="font-size: 16px; color: var(--text-muted); margin-bottom: 12px; word-break: keep-all;">
+          Cloudflare Worker API 엔드포인트를 지정합니다. 기본 로컬 개발 환경 주소는 `http://localhost:8787` 입니다.
+        </p>
+
+        <input type="text" class="input-field" id="input-worker-url" placeholder="https://nevi-worker.your-subdomain.workers.dev" style="margin-bottom: 16px;">
+        <button class="btn btn-primary" id="btn-settings-save-url">서버 연결 주소 저장</button>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 12px;">데이터 초기화</h3>
+        <p style="font-size: 16px; color: var(--text-muted); margin-bottom: 20px;">
+          앱 사용 기록 및 모든 설정을 초기화합니다. 이 작업은 되돌릴 수 없습니다.
+        </p>
+        <button class="btn btn-secondary" id="btn-settings-reset-all" style="color: var(--danger-color); border-color: rgba(255, 107, 107, 0.2);">모든 데이터 초기화</button>
+      </div>
+    </section>
+
+    <!-- 하단 고정 탭 바 -->
+    <nav class="nav-bar" id="app-nav-bar">
+      <div class="nav-item active" data-target="action">
+        <div class="nav-icon">🧭</div>
+        <div>오늘의 행동</div>
+      </div>
+      <div class="nav-item" data-target="history">
+        <div class="nav-icon">📝</div>
+        <div>지난 기록</div>
+      </div>
+      <div class="nav-item" data-target="settings">
+        <div class="nav-icon">⚙️</div>
+        <div>설정</div>
+      </div>
+    </nav>
+
+    <!-- 알림 토스트 -->
+    <div class="toast" id="app-toast">알림 메시지</div>
+
+  </div>
+
+  <!-- 한도 초과(무료 질문 소진) 안내 모달 -->
+  <div class="modal-overlay" id="rate-limit-modal">
+    <div class="modal-content" style="text-align: center;">
+      <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
+      <h3 class="modal-title" style="color: var(--primary-color);">알림</h3>
+      <p class="modal-desc" id="rate-limit-error-msg" style="font-size: 20px; font-weight: 700; line-height: 1.6; word-break: keep-all; color: var(--text-main); margin-bottom: 24px;">
+        오늘의 무료 질문은 끝났습니다.<br>내일 다시 와주세요!
+      </p>
+      
+      <button class="btn btn-primary" id="btn-rate-limit-close">확인</button>
+    </div>
+  </div>
+
+  <!-- JS 구현 코드 -->
+  <script>
+    // -------------------------------------------------------------
+    // 전역 상태 및 상수 설정
+    // -------------------------------------------------------------
+    const STATE = {
+      currentScreen: 'splash', // splash, input, loading, result, save-success, retro, history, settings
+      currentStep: 1, // 1: direction, 2: interest, 3: time, 4: mood
+      direction: '',
+      interests: [],
+      time: '',
+      mood: '',
+      recommendedActions: [],
+      selectedAction: null,
+      activeAction: null, // 현재 실천 중인 행동 데이터
+      selectedRetroResult: '',
+      selectedRetroReason: ''
+    };
+
+    // 로컬스토리지 키 설정 일치 요구사항 적용
+    const STORAGE_KEYS = {
+      WORKER_URL: 'nevi_worker_url',
+      DEVICE_ID: 'nevi_device_id',
+      VISITED: 'nevi_visited',
+      RECORDS: 'nevi_records'
+    };
+
+    // 로컬 폴백용 풍부한 인생 설계 행동 데이터 베이스 (CORS/API 에러용)
+    const FALLBACK_ACTIONS = {
+      "새로운 일 시작하기": {
+        "돈": [
+          { text: "재테크 커뮤니티의 인기 글 하나 골라서 꼼꼼히 끝까지 읽기", minutes: 10 },
+          { text: "최근 출시된 고금리 적금 또는 예금 상품 비교 검색하기", minutes: 30 },
+          { text: "가까운 공인중개업소 간판 구경하며 주위 시세 어플로 검색해보기", minutes: 30 }
+        ],
+        "건강": [
+          { text: "바른 자세로 서서 깊은 호흡하며 가벼운 목/어깨 스트레칭 3회 반복하기", minutes: 10 },
+          { text: "집 근처 걷기 좋은 공원이나 산책 코스 스마트폰 지도로 찾아보기", minutes: 10 },
+          { text: "유튜브에서 '50대 기초 체력 운동' 검색 후 첫 영상 끝까지 시청하기", minutes: 30 }
+        ],
+        "취미": [
+          { text: "취미 클래스 어플(소모임 등)을 설치하고 내 관심 주제 검색해보기", minutes: 10 },
+          { text: "배우고 싶은 악기나 미술 도구의 입문자용 가격 쇼핑몰로 검색하기", minutes: 10 },
+          { text: "동네 문화센터 또는 복지관의 다음 분기 취미 강좌 목록 다운로드해 확인하기", minutes: 30 }
+        ],
+        "default": [
+          { text: "책상 위 노트 한 권을 펴고 내가 새로 시작하고 싶은 일 3가지 메모지에 적기", minutes: 10 },
+          { text: "새롭게 다짐한 일을 도울 수 있는 관련 유튜브 튜토리얼 영상 1편 찾아서 보기", minutes: 30 },
+          { text: "도서관 모바일 웹사이트에 접속해 관련 분야의 입문 도서 2권 도서 예약해두기", minutes: 30 }
+        ]
+      },
+      "AI 배우기": {
+        "AI": [
+          { text: "ChatGPT나 Claude 모바일 앱 설치하고 가입해서 첫인사 메시지 보내보기", minutes: 10 },
+          { text: "무료 AI 이미지 생성 사이트에 들어가서 '파란 하늘과 꽃바람' 한글로 입력해보기", minutes: 10 },
+          { text: "유튜브에서 '인공지능 실생활 활용법' 초보자 가이드 영상 1개 골라 감상하기", minutes: 30 }
+        ],
+        "default": [
+          { text: "웹브라우저를 열어 AI 포털 사이트 홈화면 둘러보고 즐겨찾기 해두기", minutes: 10 },
+          { text: "인터넷 기사 중 인공지능 관련 뉴스를 검색하여 흥미로운 기사 딱 1개 읽어보기", minutes: 10 },
+          { text: "AI 코딩 툴이나 대화형 챗봇에게 '오늘 50대를 위한 유쾌한 격언 하나 해줘' 물어보기", minutes: 10 }
+        ]
+      },
+      "쉬어가기": {
+        "여행": [
+          { text: "가보고 싶었던 국내 조용한 여행지나 숲속 펜션 사진 3장 찾아보며 대리 만족하기", minutes: 10 },
+          { text: "가까운 도심 속 정원이나 카페를 찾아 지도 앱에 저장해두고 내일 일정 잡기", minutes: 10 },
+          { text: "기차표 예매 어플(코레일톡 등)을 켜고 다음 주 평일 낮 시간 열차 요금 및 좌석 확인하기", minutes: 30 }
+        ],
+        "default": [
+          { text: "좋아하는 편안한 음악을 볼륨 낮게 틀고, 눈을 감은 채로 3분 동안 명상하기", minutes: 10 },
+          { text: "따뜻한 보리차나 둥굴레차를 한 잔 정성껏 내려서 천천히 음미하며 마시기", minutes: 10 },
+          { text: "오래된 앨범 속 사진을 구경하거나 스마트폰 사진첩을 아래로 스크롤하며 추억 여행하기", minutes: 30 }
+        ]
+      },
+      "건강 챙기기": {
+        "건강": [
+          { text: "허리를 똑바로 펴고 앉아 턱을 당긴 후 목 관절 서서히 시계방향으로 5회 회전하기", minutes: 10 },
+          { text: "물 한 잔을 시원하게 따라 마신 뒤 가볍게 제자리 걷기 100보 달성하기", minutes: 10 },
+          { text: "오늘 하루 먹은 식사 기록을 머릿속으로 짚어보며 부족한 영양소(채소, 단백질 등) 체크하기", minutes: 10 }
+        ],
+        "default": [
+          { text: "누워서 양 다리를 하늘로 뻗고 흔들어주는 '모구 운동' 3분 동안 진행하며 순환 돕기", minutes: 10 },
+          { text: "유튜브에서 '시니어 맞춤형 실내 10분 걷기 스트레칭' 채널 찾아 따라 해보기", minutes: 30 },
+          { text: "오늘 저녁이나 내일 식단에 올릴 제철 나물이나 건강한 단백질 반찬 장보기 목록 작성하기", minutes: 10 }
+        ]
+      },
+      "나만의 프로젝트 만들기": {
+        "유튜브": [
+          { text: "유튜브 어플을 열고 내가 좋아하는 시니어 크리에이터 채널의 첫 영상을 찾아보기", minutes: 10 },
+          { text: "나만의 첫 영상 주제(예: 나의 인생 요리법, 은퇴 후 일상 등) 한 문장으로 낙서해보기", minutes: 10 },
+          { text: "스마트폰 카메라로 창밖 풍경이나 집안의 따스한 오브제 10초 분량 동영상 3개 찍어보기", minutes: 30 }
+        ],
+        "default": [
+          { text: "내가 평소에 잘 만드는 요리나 취미 기술을 1단계부터 5단계까지 순서대로 메모하기", minutes: 10 },
+          { text: "프로젝트 이름을 정해보고 로고로 쓰면 좋을 만한 무료 디자인 어플 구경하기", minutes: 10 },
+          { text: "프로젝트 진행에 참고할 만한 다른 사람의 홈페이지나 블로그 글 2개 찾아 읽기", minutes: 30 }
+        ]
+      }
+    };
+
+    // -------------------------------------------------------------
+    // DOM 로드 및 초기화
+    // -------------------------------------------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      initApp();
+      setupEventListeners();
+    });
+
+    // -------------------------------------------------------------
+    // 앱 초기화 로직
+    // -------------------------------------------------------------
+    function initApp() {
+      // 고유 디바이스 ID 자동 생성 및 로드
+      let deviceId = localStorage.getItem(STORAGE_KEYS.DEVICE_ID);
+      if (!deviceId) {
+        deviceId = "device_" + Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
+        localStorage.setItem(STORAGE_KEYS.DEVICE_ID, deviceId);
+      }
+
+      // 스플래시 화면 노출 여부 체크
+      const hasVisited = localStorage.getItem(STORAGE_KEYS.VISITED);
+      if (hasVisited === 'true') {
+        // 이미 방문한 경우 S1 상태 입력 화면으로 바로 진입
+        document.getElementById("app-header").style.display = "flex";
+        showScreen('input');
+        
+        // 만약 로컬스토리지에 진행 중인(회고하지 않은) 오늘 날짜 기록이 있다면 회고로 바로 보냅니다.
+        checkActiveAction();
+      } else {
+        // 첫 방문자인 경우 S0 스플래시 노출
+        document.getElementById("app-header").style.display = "none";
+        showScreen('splash');
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 이벤트 리스너 등록
+    // -------------------------------------------------------------
+    function setupEventListeners() {
+      // 로고 클릭 시 처음 화면(홈)으로 이동
+      document.getElementById("app-logo-home").addEventListener("click", () => {
+        if (STATE.currentScreen === 'splash' || STATE.currentScreen === 'loading') return;
+        
+        const records = getRecords();
+        const activeAction = records.find(r => r.status === 'pending');
+        
+        if (activeAction) {
+          if (confirm("현재 진행 중인 오늘 행동이 있습니다. 처음으로 돌아가 새로운 행동을 탐색하시겠습니까?\n(기존 진행 중인 행동은 목록에서 삭제됩니다.)")) {
+            const filtered = records.filter(r => r.status !== 'pending');
+            saveRecords(filtered);
+            STATE.activeAction = null;
+            resetWizard();
+            showScreen('input');
+            showToast("초기 화면으로 이동했습니다.");
+          }
+        } else {
+          resetWizard();
+          showScreen('input');
+          showToast("초기 화면으로 이동했습니다.");
+        }
+      });
+
+      // S0: 스플래시 시작하기
+      document.getElementById("btn-splash-start").addEventListener("click", () => {
+        localStorage.setItem(STORAGE_KEYS.VISITED, 'true');
+        document.getElementById("app-header").style.display = "flex";
+        showScreen('input');
+      });
+
+      // S1: 라디오 카드 및 체크박스 카드 스타일 바인딩
+      setupSelectableCards();
+
+      // S1: Wizard 네비게이션
+      // Step 1: 방향 선택 -> Step 2-1
+      document.getElementById("btn-dir-next").addEventListener("click", () => {
+        STATE.direction = getSelectedRadioValue("input-direction");
+        goToWizardStep(2);
+      });
+
+      // Step 2-1: 관심사 -> Step 2-2
+      document.getElementById("btn-interest-prev").addEventListener("click", () => {
+        goToWizardStep(1);
+      });
+      document.getElementById("btn-interest-next").addEventListener("click", () => {
+        STATE.interests = getSelectedCheckboxValues("input-interest");
+        goToWizardStep(3);
+      });
+
+      // Step 2-2: 시간 -> Step 2-3
+      document.getElementById("btn-time-prev").addEventListener("click", () => {
+        goToWizardStep(2);
+      });
+      document.getElementById("btn-time-next").addEventListener("click", () => {
+        STATE.time = getSelectedRadioValue("input-time");
+        goToWizardStep(4);
+      });
+
+      // Step 2-3: 기분 -> AI 한 걸음 찾기 시작
+      document.getElementById("btn-mood-prev").addEventListener("click", () => {
+        goToWizardStep(3);
+      });
+      document.getElementById("btn-find-step").addEventListener("click", () => {
+        // 기분 수집은 mood-card 클릭 핸들러에서 바인딩됨
+        startAiAnalysis();
+      });
+
+      // S3: 결과 화면 버튼
+      document.getElementById("btn-result-retry").addEventListener("click", () => {
+        // 리셋 후 다시 입력 화면으로
+        resetWizard();
+        showScreen('input');
+      });
+
+      document.getElementById("btn-result-confirm").addEventListener("click", () => {
+        saveSelectedAction();
+      });
+
+      // S5: 회고 화면 버튼
+      setupRetroEventListeners();
+      
+      document.getElementById("btn-retro-submit").addEventListener("click", () => {
+        submitRetro();
+      });
+
+      // 하단 네비게이션 바 제어
+      const navItems = document.querySelectorAll(".nav-item");
+      navItems.forEach(item => {
+        item.addEventListener("click", (e) => {
+          const target = item.dataset.target;
+          
+          // 활성화 표시 처리
+          navItems.forEach(nav => nav.classList.remove("active"));
+          item.classList.add("active");
+
+          if (target === 'action') {
+            // 오늘의 행동 탭 분기 처리
+            const records = getRecords();
+            const activeAction = records.find(r => r.status === 'pending');
+            
+            if (activeAction) {
+              // 진행 중인 행동이 있으면 S5 회고 화면 노출
+              STATE.activeAction = activeAction;
+              renderRetroView();
+              showScreen('retro');
+            } else if (STATE.recommendedActions.length > 0 && !STATE.selectedAction) {
+              // 추천 결과는 있는데 아직 선택 안 한 상태면 S3
+              showScreen('result');
+            } else {
+              // 진행 중인 것도 없고 추천도 없으면 상태 입력 S1
+              showScreen('input');
+            }
+          } else if (target === 'history') {
+            renderHistoryView();
+            showScreen('history');
+          } else if (target === 'settings') {
+            renderSettingsView();
+            showScreen('settings');
+          }
+        });
+      });
+
+      // 한도 초과 모달 확인 버튼
+      document.getElementById("btn-rate-limit-close").addEventListener("click", () => {
+        closeRateLimitModal();
+      });
+
+      // 설정 화면 Worker URL 저장 버튼
+      document.getElementById("btn-settings-save-url").addEventListener("click", () => {
+        const urlInput = document.getElementById("input-worker-url").value.trim();
+        if (urlInput) {
+          localStorage.setItem(STORAGE_KEYS.WORKER_URL, urlInput);
+          showToast("서버 연결 주소가 저장되었습니다.");
+        } else {
+          showToast("올바른 URL 주소를 입력하세요.");
+        }
+      });
+
+      document.getElementById("btn-settings-reset-all").addEventListener("click", () => {
+        if (confirm("정말로 모든 방문 기록, 설정, 지난 행동 데이터를 초기화하시겠습니까?")) {
+          localStorage.clear();
+          showToast("모든 데이터가 초기화되었습니다.");
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        }
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 화면 전환 제어 함수
+    // -------------------------------------------------------------
+    function showScreen(screenId) {
+      // 모든 화면 비활성화
+      const screens = document.querySelectorAll(".screen");
+      screens.forEach(s => s.classList.remove("active"));
+
+      // 해당 화면 활성화
+      const targetScreen = document.getElementById(`screen-${screenId}`);
+      if (targetScreen) {
+        targetScreen.classList.add("active");
+        STATE.currentScreen = screenId;
+      }
+
+      // 하단 네비바 노출 제어 (스플래시, 로딩, 저장 완료 화면에서는 네비바 숨김)
+      const navBar = document.getElementById("app-nav-bar");
+      if (screenId === 'splash' || screenId === 'loading' || screenId === 'save-success') {
+        navBar.classList.remove("active");
+      } else {
+        navBar.classList.add("active");
+        
+        // 현재 노출된 화면에 맞춰 하단 탭 포커스 동기화
+        const navItems = document.querySelectorAll(".nav-item");
+        navItems.forEach(item => item.classList.remove("active"));
+        
+        if (screenId === 'input' || screenId === 'result' || screenId === 'retro') {
+          document.querySelector('.nav-item[data-target="action"]').classList.add("active");
+        } else if (screenId === 'history') {
+          document.querySelector('.nav-item[data-target="history"]').classList.add("active");
+        } else if (screenId === 'settings') {
+          document.querySelector('.nav-item[data-target="settings"]').classList.add("active");
+        }
+      }
+      
+      // 스크롤 상단으로 강제 이동
+      window.scrollTo(0, 0);
+    }
+
+    // -------------------------------------------------------------
+    // Wizard 단계 제어 (S1)
+    // -------------------------------------------------------------
+    function goToWizardStep(stepNum) {
+      STATE.currentStep = stepNum;
+      
+      // 프로그레스 바 제어
+      const bar = document.getElementById("wizard-progress-bar");
+      bar.style.width = `${stepNum * 25}%`;
+
+      // 모든 단계 가리기
+      const steps = document.querySelectorAll(".step-container");
+      steps.forEach(s => s.classList.remove("active"));
+
+      // 대상 단계 노출
+      let stepId = '';
+      if (stepNum === 1) stepId = 'step-direction';
+      else if (stepNum === 2) stepId = 'step-interest';
+      else if (stepNum === 3) stepId = 'step-time';
+      else if (stepNum === 4) stepId = 'step-mood';
+
+      document.getElementById(stepId).classList.add("active");
+      window.scrollTo(0, 0);
+    }
+
+    function resetWizard() {
+      // 입력값들 초기화
+      STATE.direction = '';
+      STATE.interests = [];
+      STATE.time = '';
+      STATE.mood = '';
+      STATE.recommendedActions = [];
+      STATE.selectedAction = null;
+
+      // HTML 폼 요소 리셋
+      const inputs = document.querySelectorAll(".selectable-card input");
+      inputs.forEach(input => {
+        input.checked = false;
+      });
+
+      const moodCards = document.querySelectorAll(".mood-card");
+      moodCards.forEach(m => m.classList.remove("selected"));
+
+      // 버튼 비활성화
+      document.getElementById("btn-dir-next").disabled = true;
+      document.getElementById("btn-interest-next").disabled = true;
+      document.getElementById("btn-time-next").disabled = true;
+      document.getElementById("btn-find-step").disabled = true;
+
+      // 1단계로 이동
+      goToWizardStep(1);
+    }
+
+    // -------------------------------------------------------------
+    // UI 카드 선택 효과 및 상태 갱신 설정
+    // -------------------------------------------------------------
+    function setupSelectableCards() {
+      const inputs = document.querySelectorAll(".selectable-card input");
+      inputs.forEach(input => {
+        input.addEventListener("change", () => {
+          const name = input.name;
+          const type = input.type;
+
+          if (type === 'radio') {
+            // 단계별 유효성 체크
+            if (name === 'input-direction') {
+              document.getElementById("btn-dir-next").disabled = false;
+            } else if (name === 'input-time') {
+              document.getElementById("btn-time-next").disabled = false;
+            }
+          } else if (type === 'checkbox') {
+            // 체크박스 활성화 여부 체크 (최소 1개 이상 선택 필요)
+            const checkedInterests = getSelectedCheckboxValues("input-interest");
+            document.getElementById("btn-interest-next").disabled = checkedInterests.length === 0;
+          }
+        });
+      });
+
+      // 기분 선택 (이모지 카드 클릭 제어)
+      const moodCards = document.querySelectorAll(".mood-card");
+      moodCards.forEach(card => {
+        card.addEventListener("click", () => {
+          moodCards.forEach(c => c.classList.remove("selected"));
+          card.classList.add("selected");
+          STATE.mood = card.dataset.value;
+          document.getElementById("btn-find-step").disabled = false;
+        });
+      });
+    }
+
+    // -------------------------------------------------------------
+    // Helper: 폼 데이터 수집
+    // -------------------------------------------------------------
+    function getSelectedRadioValue(name) {
+      const checked = document.querySelector(`input[name="${name}"]:checked`);
+      return checked ? checked.value : '';
+    }
+
+    function getSelectedCheckboxValues(name) {
+      const checkedElements = document.querySelectorAll(`input[name="${name}"]:checked`);
+      const values = [];
+      checkedElements.forEach(el => values.push(el.value));
+      return values;
+    }
+
+    // -------------------------------------------------------------
+    // AI 행동 탐색 프로세스 (S2)
+    // -------------------------------------------------------------
+    async function startAiAnalysis() {
+      showScreen('loading');
+      
+      // 사용자에게 로딩 중 텍스트 다이내믹 피드백
+      const loadingTexts = [
+        "Nevi가 다음 걸음을 찾고 있어요...",
+        "당신의 오늘 기분을 들여다보는 중...",
+        "가장 알맞은 10분 계획을 세우는 중...",
+        "조금만 기다려주세요, 거의 다 준비되었습니다."
+      ];
+      let textIdx = 0;
+      const textInterval = setInterval(() => {
+        textIdx = (textIdx + 1) % loadingTexts.length;
+        document.getElementById("loading-text-content").textContent = loadingTexts[textIdx];
+      }, 2000);
+
+      // 마지막에 진행한 실패 기록이 있다면 API에 이전 정보를 같이 반영하기 위해 로드
+      const records = getRecords();
+      const lastFailedRecord = records.filter(r => r.status === 'failed').pop();
+      const prevResult = lastFailedRecord ? lastFailedRecord.action : '';
+      const prevReason = lastFailedRecord ? lastFailedRecord.retroReason : '';
+
+      try {
+        // Cloudflare Worker API 호출
+        const apiResult = await callNevi(
+          STATE.interests,
+          STATE.time,
+          STATE.mood,
+          prevResult,
+          prevReason
+        );
+
+        STATE.recommendedActions = apiResult.actions || [];
+        document.getElementById("result-context-text").textContent = apiResult.context || "당신만을 위한 다음 한 걸음 제안입니다.";
+      } catch (err) {
+        // 하루 호출 제한(Rate Limit)을 넘었을 경우, 친절하게 안내 문구 노출 및 로컬 폴백 회피
+        if (err.message.includes("오늘의 무료 질문")) {
+          showRateLimitModal(err.message);
+          return;
+        }
+
+        console.warn("API 호출 중 오류가 발생하여 로컬 템플릿 추천 엔진(Fallback)으로 대체합니다:", err);
+        // 그 외 에러 또는 CORS 발생 시 로컬 Fallback 실행
+        const fallbackResult = getLocalFallbackResult(STATE.direction, STATE.interests, STATE.time, STATE.mood);
+        STATE.recommendedActions = fallbackResult.actions;
+        document.getElementById("result-context-text").textContent = fallbackResult.context;
+        showToast("⚠️ 로컬 추천 엔진이 작동 중입니다.");
+      } finally {
+        clearInterval(textInterval);
+        if (STATE.recommendedActions.length > 0) {
+          renderResultView();
+          showScreen('result');
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Cloudflare Worker API 호출 대행 함수 (Claude API 환경변수 보관)
+    // -------------------------------------------------------------
+    async function callNevi(interest, time, mood, prevResult, prevReason) {
+      // 로컬스토리지에 저장된 Worker 주소 획득 (기본은 실제 배포된 서버리스 주소)
+      const workerUrl = localStorage.getItem(STORAGE_KEYS.WORKER_URL) || 'https://nevi-worker.yukyongae.workers.dev';
+      const deviceId = localStorage.getItem(STORAGE_KEYS.DEVICE_ID);
+
+      const response = await fetch(workerUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          direction: STATE.direction,
+          interest: interest,
+          time: time,
+          mood: mood,
+          prevResult: prevResult,
+          prevReason: prevReason,
+          deviceId: deviceId
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // 429 Rate Limit 등 에러 시 Worker가 준 친절한 에러 문구 추출
+        throw new Error(data.error || "추천 엔진에서 오류가 발생했습니다.");
+      }
+
+      return data;
+    }
+
+    // -------------------------------------------------------------
+    // 로컬 Fallback 추천 엔진 알고리즘
+    // -------------------------------------------------------------
+    function getLocalFallbackResult(direction, interests, time, mood) {
+      // 1. 방향에 해당하는 최우선 카드 추출
+      let pool = [];
+      const dirPool = FALLBACK_ACTIONS[direction] || FALLBACK_ACTIONS["쉬어가기"];
+      
+      // 2. 관심사 중 첫 번째 선택 요소를 매핑
+      let foundInterest = false;
+      for (let item of interests) {
+        if (dirPool[item]) {
+          pool = pool.concat(dirPool[item]);
+          foundInterest = true;
+          break;
+        }
+      }
+      
+      // 없으면 default 풀 사용
+      if (!foundInterest || pool.length === 0) {
+        pool = dirPool["default"] || FALLBACK_ACTIONS["쉬어가기"]["default"];
+      }
+
+      // 3. 기분 가중치에 따른 시간 및 난이도 조절
+      let targetTimeMinutes = 10;
+      if (time === "30분") targetTimeMinutes = 30;
+      else if (time === "1시간") targetTimeMinutes = 60;
+      else if (time === "2시간 이상") targetTimeMinutes = 120;
+
+      // 기분이 막막함/지침이면 강제적으로 10분 혹은 20분 내의 아주 가벼운 행동으로 제한
+      const isDownMood = (mood === "막막함" || mood === "지침");
+      if (isDownMood) {
+        targetTimeMinutes = 10;
+      }
+
+      // 4. 추천할 3가지 후보 액션 가공 생성
+      const finalActions = [];
+      
+      // 복제본 생성 후 가공
+      const poolCopy = JSON.parse(JSON.stringify(pool));
+      
+      // 시간 맞춰 필터링 또는 가중치 부여
+      poolCopy.forEach((act, idx) => {
+        if (isDownMood) {
+          act.text = "🌱 " + act.text.replace("끝까지 읽기", "앞부분만 가볍게 읽기").replace("따라 해보기", "눈으로 가만히 지켜보기");
+          act.minutes = 10; // 난이도 강제 완화
+        } else {
+          act.minutes = Math.min(act.minutes, targetTimeMinutes);
+        }
+        
+        finalActions.push({
+          text: act.text,
+          minutes: act.minutes
+        });
+      });
+
+      // 3개 미만 시 폴백 기본 풀 추가 패딩
+      while (finalActions.length < 3) {
+        finalActions.push({
+          text: `가볍게 눈을 감고 오늘의 방향인 [${direction}]에 대해 5분간 숨을 쉬며 생각정리하기`,
+          minutes: 10
+        });
+      }
+
+      // 기분에 따라 맞춤형 격려가 깃든 컨텍스트 생성
+      let contextMsg = "";
+      if (mood === '의욕적') {
+        contextMsg = "의욕이 넘치는 날이네요! 이 에너지를 원동력 삼아 나만의 소중한 걸음을 내딛어 봅시다.";
+      } else if (isDownMood) {
+        contextMsg = "마음이 무거운 날에는 가장 작은 일부터 시작하는 것이 정답입니다. 부담 없이 몸만 살짝 풀어주세요.";
+      } else {
+        contextMsg = "오늘 하루도 애쓰고 계신 당신을 위해 딱 알맞고 실천하기 부드러운 걸음을 준비했어요.";
+      }
+
+      return {
+        title: "오늘의 다음 한 걸음",
+        context: contextMsg,
+        actions: finalActions.slice(0, 3)
+      };
+    }
+
+    // -------------------------------------------------------------
+    // 결과 렌더링 및 선택 로직 (S3)
+    // -------------------------------------------------------------
+    function renderResultView() {
+      const container = document.getElementById("result-action-list");
+      container.innerHTML = '';
+      STATE.selectedAction = null;
+      document.getElementById("btn-result-confirm").disabled = true;
+
+      STATE.recommendedActions.forEach((action, idx) => {
+        const card = document.createElement("div");
+        card.className = "action-card";
+        card.dataset.index = idx;
+        
+        card.innerHTML = `
+          <div class="action-header">
+            <span class="time-badge">${action.minutes}분 소요</span>
+            <div class="action-select-indicator"></div>
+          </div>
+          <div class="action-text">${action.text}</div>
+        `;
+
+        card.addEventListener("click", () => {
+          // 기존 선택 해제
+          document.querySelectorAll(".action-card").forEach(c => c.classList.remove("selected"));
+          
+          // 신규 선택 활성화
+          card.classList.add("selected");
+          STATE.selectedAction = action;
+          document.getElementById("btn-result-confirm").disabled = false;
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 행동 저장 및 24시간 자동 이동 연출 (S4 -> S5)
+    // -------------------------------------------------------------
+    function saveSelectedAction() {
+      if (!STATE.selectedAction) return;
+
+      const todayStr = getTodayString();
+      const records = getRecords();
+
+      // 기존 당일 진행 중인 행동(pending)이 있으면 교체하거나 처리
+      const filteredRecords = records.filter(r => r.date !== todayStr || r.status !== 'pending');
+
+      const newRecord = {
+        date: todayStr,
+        action: STATE.selectedAction.text,
+        minutes: STATE.selectedAction.minutes,
+        direction: STATE.direction,
+        mood: STATE.mood,
+        status: 'pending', // 진행중 상태
+        retroResult: '',
+        retroReason: '',
+        feedback: ''
+      };
+
+      filteredRecords.push(newRecord);
+      saveRecords(filteredRecords);
+      
+      STATE.activeAction = newRecord;
+
+      // S4 성공 애니메이션 띄우기
+      showScreen('save-success');
+
+      // 2초간 띄운 후 자동으로 S5 회고 화면으로 안내
+      setTimeout(() => {
+        renderRetroView();
+        showScreen('retro');
+      }, 2000);
+    }
+
+    // -------------------------------------------------------------
+    // S5: 회고 화면 제어 및 피드백 처리
+    // -------------------------------------------------------------
+    function setupRetroEventListeners() {
+      const choiceBtns = document.querySelectorAll(".retro-choice-btn");
+      choiceBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          choiceBtns.forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          STATE.selectedRetroResult = btn.dataset.value;
+
+          const reasonContainer = document.getElementById("retro-reason-container");
+          if (STATE.selectedRetroResult === 'failed') {
+            reasonContainer.classList.add("active");
+            STATE.selectedRetroReason = '';
+            document.getElementById("btn-retro-submit").disabled = true;
+          } else {
+            reasonContainer.classList.remove("active");
+            STATE.selectedRetroReason = '';
+            document.getElementById("btn-retro-submit").disabled = false;
+          }
+        });
+      });
+
+      // 실패 이유 라디오 카드 변경 리스너
+      const reasonRadios = document.querySelectorAll("input[name='retro-reason']");
+      reasonRadios.forEach(radio => {
+        radio.addEventListener("change", () => {
+          if (radio.checked) {
+            STATE.selectedRetroReason = radio.value;
+            document.getElementById("btn-retro-submit").disabled = false;
+          }
+        });
+      });
+    }
+
+    function renderRetroView() {
+      // 폼 리셋
+      STATE.selectedRetroResult = '';
+      STATE.selectedRetroReason = '';
+      document.querySelectorAll(".retro-choice-btn").forEach(b => b.classList.remove("selected"));
+      document.getElementById("retro-reason-container").classList.remove("active");
+      document.querySelectorAll("input[name='retro-reason']").forEach(r => {
+        r.checked = false;
+        r.closest(".selectable-card").classList.remove("selected");
+      });
+      document.getElementById("retro-feedback-card").classList.remove("active");
+      document.getElementById("btn-retro-submit").disabled = true;
+      document.getElementById("btn-retro-submit").style.display = "block";
+
+      // 현재 진행 중인 행동 텍스트 바인딩
+      if (STATE.activeAction) {
+        document.getElementById("retro-active-action-text").textContent = STATE.activeAction.action;
+      }
+    }
+
+    function submitRetro() {
+      if (!STATE.activeAction || !STATE.selectedRetroResult) return;
+
+      // 죄책감 유발 금지 인생 피드백 메시지 맵
+      const feedbackMap = {
+        'completed': [
+          "대단하십니다! 스스로와의 약속을 지키며 오늘 더 빛나는 한 걸음을 만드셨네요. 이 기분 좋은 성취감을 마음껏 느끼셔도 좋습니다.",
+          "훌륭합니다! 오늘의 이 가볍고도 소중한 실천이 차곡차곡 쌓여 당신을 새로운 일상으로 이끌어 줄 것입니다.",
+          "기분 좋은 시작을 끊으셨군요! 오늘 이룬 성공을 바탕으로 나만의 튼튼한 리듬을 다져보세요. 아주 기특한 날입니다."
+        ],
+        'partial': [
+          "절반이라도 내딛으셨다니 매우 기쁩니다. 시작이 반이라는 말처럼, 완벽하게 끝마치지 못했더라도 그 시도 자체가 위대한 한 걸음입니다.",
+          "아주 훌륭해요! 조금이라도 몸과 마음을 움직였다는 사실이 가장 중요합니다. 오늘 가능한 만큼 조율하여 진행한 것이 완벽주의보다 백 배 낫습니다.",
+          "가벼운 마음으로 걸어본 것이 정답입니다. 다음에도 에너지가 허락하는 만큼 편하게만 실천하셔도 전혀 무방합니다. 수고 많으셨어요."
+        ],
+        'failed': {
+          '바빴다': [
+            "오늘 일정이 많이 분주하셨군요! 나의 일상과 컨디션을 챙기는 것이 가장 1순위여야 합니다. 무리하지 마시고 여유가 찾아올 때 언제든 다시 가볍게 시작하면 됩니다.",
+            "바쁜 와중에도 Nevi에 찾아와 회고해주신 마음만으로 충분히 멋집니다. 바쁜 하루 끝에 편안하게 휴식을 가지세요. 실천은 그저 건강을 돕는 보조 도구일 뿐입니다."
+          ],
+          '막막했다': [
+            "막막하고 낯설게 느껴지는 것은 도전하는 과정에서 너무나 자연스러운 감정입니다. 다음 한 걸음은 훨씬 더 귀엽고 말도 안 되게 쉬운 난이도(예: 3분만 둘러보기)로 조절해 드릴게요. 오늘은 푹 쉬세요.",
+            "어려움을 직면했다는 사실을 편하게 고백해 주셔서 감사합니다. 내일의 내비게이터는 당신의 눈높이와 컨디션에 딱 맞춰 훨씬 안전하고 완만하게 지도를 그려 드릴게요."
+          ],
+          '관심이 바뀌었다': [
+            "나의 시선이 머무는 자리를 부지런히 찾아가는 과정 역시 인생 내비게이션의 소중한 경로 변경 단계입니다. 방향을 다시 돌려가며 내가 진짜 하고 싶은 일을 발견해 나가는 지혜로운 선택을 응원합니다.",
+            "유연한 계획 변경이 가장 좋은 코칭입니다. 흥미가 식은 일을 억지로 잡고 있을 필요는 전혀 없으니까요. 내일 새로운 관심에 딱 맞추어 멋진 계획으로 돌아올게요."
+          ],
+          'default': [
+            "행동을 실천하지 못해도 아무 문제 없습니다. 오늘의 쉼표가 내일 더 편안한 시작을 가능하게 할 테니까요. 가벼운 마음으로 한 템포 쉬어가셔도 좋습니다.",
+            "죄책감을 가질 필요는 전혀 없어요. 내비게이션은 언제나 당신이 출발할 수 있을 때까지 묵묵히 제자리에서 친절하게 기다립니다."
+          ]
+        }
+      };
+
+      // 결과 메시지 추출
+      let resultMsg = "";
+      if (STATE.selectedRetroResult === 'completed') {
+        const pool = feedbackMap['completed'];
+        resultMsg = pool[Math.floor(Math.random() * pool.length)];
+      } else if (STATE.selectedRetroResult === 'partial') {
+        const pool = feedbackMap['partial'];
+        resultMsg = pool[Math.floor(Math.random() * pool.length)];
+      } else {
+        const reason = STATE.selectedRetroReason || 'default';
+        const pool = feedbackMap['failed'][reason] || feedbackMap['failed']['default'];
+        resultMsg = pool[Math.floor(Math.random() * pool.length)];
+      }
+
+      // 로컬스토리지 레코드 갱신
+      const records = getRecords();
+      const targetRecord = records.find(r => r.date === STATE.activeAction.date && r.status === 'pending');
+      if (targetRecord) {
+        targetRecord.status = STATE.selectedRetroResult;
+        targetRecord.retroReason = STATE.selectedRetroReason;
+        targetRecord.feedback = resultMsg;
+        saveRecords(records);
+      }
+
+      // 화면에 피드백 노출
+      const feedbackCard = document.getElementById("retro-feedback-card");
+      const feedbackText = document.getElementById("retro-feedback-text");
+      feedbackText.textContent = resultMsg;
+      feedbackCard.classList.add("active");
+
+      // 완료하기 버튼 숨기고 피드백 보여주기
+      document.getElementById("btn-retro-submit").style.display = "none";
+      
+      // 진행중인 전역 상태 지우기
+      STATE.activeAction = null;
+      STATE.recommendedActions = [];
+      STATE.selectedAction = null;
+
+      showToast("회고가 소중하게 기록되었습니다.");
+    }
+
+    // -------------------------------------------------------------
+    // S6: 지난 기록 리스트 렌더링
+    // -------------------------------------------------------------
+    function renderHistoryView() {
+      const container = document.getElementById("history-list-container");
+      container.innerHTML = '';
+
+      const records = getRecords();
+      
+      // 최신순 정렬
+      const sortedRecords = [...records].reverse();
+
+      // 만약 저장된 기록이 하나도 없다면 빈 화면 노출
+      if (sortedRecords.length === 0) {
+        container.innerHTML = `
+          <div class="card history-empty">
+            <div style="font-size: 40px; margin-bottom: 12px;">🧭</div>
+            <div style="font-size: 19px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;">아직 기록된 행동이 없어요.</div>
+            <p style="font-size: 16px;">첫 번째 행동을 탐색하고 실천하여 소중한 기록을 채워보세요.</p>
+          </div>
+        `;
+        return;
+      }
+
+      sortedRecords.forEach(record => {
+        const card = document.createElement("div");
+        card.className = "card history-card";
+        
+        let statusBadge = "";
+        let statusColor = "";
+        let resultMsg = "";
+
+        if (record.status === 'pending') {
+          statusBadge = "⏳ 진행 중";
+          statusColor = "color: var(--primary-color); background-color: rgba(124, 106, 247, 0.15);";
+          resultMsg = `아직 실천을 진행 중입니다. 오늘의 행동 탭에서 회고를 남겨주세요.`;
+        } else if (record.status === 'completed') {
+          statusBadge = "🙂 했다";
+          statusColor = "color: var(--success-color); background-color: rgba(122, 216, 141, 0.15);";
+          resultMsg = record.feedback || "참 잘하셨습니다!";
+        } else if (record.status === 'partial') {
+          statusBadge = "😐 조금 했다";
+          statusColor = "color: #FFD43B; background-color: rgba(255, 212, 59, 0.15);";
+          resultMsg = record.feedback || "반이라도 행동한 것 자체가 대단한 용기입니다.";
+        } else {
+          statusBadge = `🙃 못 했다 (${record.retroReason || "사유 없음"})`;
+          statusColor = "color: var(--danger-color); background-color: rgba(255, 107, 107, 0.15);";
+          resultMsg = record.feedback || "마음의 부담을 덜고 가볍게 다시 도달해보세요.";
+        }
+
+        card.innerHTML = `
+          <div class="history-date-row">
+            <span class="history-date">${record.date}</span>
+            <span class="history-tag" style="${statusColor}">${statusBadge}</span>
+          </div>
+          <div class="history-direction"># ${record.direction}</div>
+          <div class="history-action-text">${record.action}</div>
+          <div class="history-retro-result">
+            <span class="history-retro-badge">💬</span>
+            <div style="flex: 1; font-size: 16px; color: var(--text-muted); line-height: 1.5; word-break: keep-all;">
+              ${resultMsg}
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // S7: 설정 화면 렌더링
+    // -------------------------------------------------------------
+    function renderSettingsView() {
+      const workerUrl = localStorage.getItem(STORAGE_KEYS.WORKER_URL) || 'https://nevi-worker.yukyongae.workers.dev';
+      const inputField = document.getElementById("input-worker-url");
+      if (inputField) {
+        inputField.value = workerUrl;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Helper: 오늘 진행중인 행동 검출
+    // -------------------------------------------------------------
+    function checkActiveAction() {
+      const records = getRecords();
+      const activeAction = records.find(r => r.status === 'pending');
+      
+      if (activeAction) {
+        STATE.activeAction = activeAction;
+        renderRetroView();
+        showScreen('retro');
+      } else {
+        showScreen('input');
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 한도 초과 안내 모달 제어
+    // -------------------------------------------------------------
+    function showRateLimitModal(msg) {
+      const modal = document.getElementById("rate-limit-modal");
+      const msgEl = document.getElementById("rate-limit-error-msg");
+      if (msgEl) {
+        msgEl.innerHTML = msg.replace(/\n/g, "<br>");
+      }
+      modal.classList.add("active");
+      
+      // 로딩 창을 끄고 입력(홈)으로 복원
+      showScreen('input');
+      resetWizard();
+    }
+
+    function closeRateLimitModal() {
+      document.getElementById("rate-limit-modal").classList.remove("active");
+    }
+
+    // -------------------------------------------------------------
+    // LocalStorage CRUD 헬퍼 함수
+    // -------------------------------------------------------------
+    function getRecords() {
+      const recordsRaw = localStorage.getItem(STORAGE_KEYS.RECORDS);
+      if (!recordsRaw) return [];
+      try {
+        return JSON.parse(recordsRaw);
+      } catch (e) {
+        console.error("데이터 로드 오류로 인해 새 배열을 만듭니다.", e);
+        return [];
+      }
+    }
+
+    function saveRecords(recordsArray) {
+      localStorage.setItem(STORAGE_KEYS.RECORDS, JSON.stringify(recordsArray));
+    }
+
+    function getTodayString() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // -------------------------------------------------------------
+    // 토스트 팝업 헬퍼 함수
+    // -------------------------------------------------------------
+    function showToast(msg) {
+      const toast = document.getElementById("app-toast");
+      toast.textContent = msg;
+      toast.classList.add("active");
+      
+      setTimeout(() => {
+        toast.classList.remove("active");
+      }, 2500);
+    }
+  </script>
+</body>
+</html>

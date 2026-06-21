@@ -1,0 +1,11 @@
+name = "nevi-worker"
+main = "worker.js"
+compatibility_date = "2024-03-01"
+
+# API 호출 제한 트래킹을 위한 KV 스토리지 바인딩
+# 배포 전 npx wrangler kv:namespace create NEVI_LIMITS 로 네임스페이스를 생성한 뒤
+# 반환된 ID 값을 아래에 대입하여 배포하면 영구 제한 저장이 가능합니다.
+[[kv_namespaces]]
+binding = "NEVI_LIMITS"
+id = "60df69535d3940a5a9d4eb27a38b59e0"
+preview_id = "your-preview-kv-namespace-id-here"
