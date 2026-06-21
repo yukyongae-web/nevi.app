@@ -989,18 +989,22 @@
 
       <!-- Step 1: 방향 선택 -->
       <div class="step-container active" id="step-direction">
-        <!-- 오늘 이미 한 걸음을 마쳤을 때 보여줄 친절한 잠금 화면 -->
-        <div id="today-completed-lock" style="display: none; text-align: center; padding: 40px 10px;">
-          <div style="font-size: 64px; margin-bottom: 24px;">✨</div>
-          <h2 style="font-size: 26px; color: var(--success-color); margin-bottom: 16px; word-break: keep-all;">오늘의 내비게이션 완료!</h2>
-          <p class="description-text" style="color: var(--text-main); font-size: 20px; font-weight: 500; line-height: 1.6; word-break: keep-all; margin-bottom: 32px;">
-            오늘의 소중한 한 걸음을 멋지게 마무리하셨습니다.<br>
-            스스로를 가득 칭찬해 주시고, 편안한 하루를 보내세요.<br><br>
-            <span style="color: var(--primary-color);">내일 새로운 마음으로 다음 걸음을 함께 찾으러 오세요. 🧭</span>
-          </p>
-          <div style="font-size: 16px; color: var(--text-muted);">
-            내일 다시 방문하시면 다음 단계를 이어서 시작할 수 있습니다.
+        <!-- 미회고 알림 배너 (분기 1) -->
+        <div id="retro-missing-banner" style="display: none; background: rgba(124, 106, 247, 0.12); border: 1px solid var(--primary-color); border-radius: 16px; padding: 18px; margin-bottom: 24px; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(124, 106, 247, 0.15); animation: fadeIn 0.4s ease-out;">
+          <div style="font-size: 18px; font-weight: 500; color: var(--text-main); word-break: keep-all; line-height: 1.5; flex: 1; padding-right: 12px; text-align: left;">
+            🧭 지난번에 저장한 한 걸음이 있습니다. 지금 실천해보셨나요?
           </div>
+          <button class="btn btn-primary" id="btn-banner-retro" style="width: auto; height: 42px; font-size: 16px; padding: 0 16px; border-radius: 10px; box-shadow: none;">회고하기</button>
+        </div>
+
+        <!-- 오늘 이미 저장한 경우 노출할 잠금 화면 (분기 2) -->
+        <div id="today-saved-lock" style="display: none; text-align: center; padding: 40px 10px;">
+          <div style="font-size: 64px; margin-bottom: 24px;">✅</div>
+          <h2 style="font-size: 26px; color: var(--success-color); margin-bottom: 16px; word-break: keep-all;">오늘의 한 걸음은 이미 저장했어요</h2>
+          <p class="description-text" style="color: var(--text-main); font-size: 19px; font-weight: 500; line-height: 1.6; word-break: keep-all; margin-bottom: 32px;">
+            내일 다시 만나요. 오늘 해보고 어땠는지 알려주세요 🌱
+          </p>
+          <button class="btn btn-primary" id="btn-lock-go-history" style="height: 52px; font-size: 18px;">지난 기록 보기</button>
         </div>
 
         <div id="direction-wizard-content">
@@ -1475,8 +1479,8 @@
         }
       }
 
-      // 오늘 날짜 행동 완료 시 잠금 제어 초기 구동
-      checkTodayCompletedLock();
+      // 오늘 날짜 행동 완료 시 잠금 및 배너 제어 초기 구동
+      checkDailyBranchAndRender();
 
       // 스플래시 화면 노출 여부 체크
       const hasVisited = localStorage.getItem(STORAGE_KEYS.VISITED);
@@ -1502,6 +1506,27 @@
     // 이벤트 리스너 등록
     // -------------------------------------------------------------
     function setupEventListeners() {
+      // 미회고 배너의 [회고하기] 클릭 시 S5 회고 이동
+      document.getElementById("btn-banner-retro").addEventListener("click", () => {
+        const records = getRecords();
+        const todayStr = getTodayString();
+        const pendingRecord = records.find(r => r.date !== todayStr && r.status === 'pending');
+        
+        if (pendingRecord) {
+          STATE.activeAction = pendingRecord;
+          renderRetroView();
+          showScreen('retro');
+        }
+      });
+
+      // 오늘 완료 락 카드 내의 [지난 기록 보기] 클릭 시 S6 이동
+      document.getElementById("btn-lock-go-history").addEventListener("click", () => {
+        const historyTab = document.querySelector('.nav-item[data-target="history"]');
+        if (historyTab) {
+          historyTab.click();
+        }
+      });
+
       // 로고 클릭 시 처음 화면(홈)으로 이동 + 5회 연타 시 이스터 에그 설정 진입
       document.getElementById("app-logo-home").addEventListener("click", () => {
         if (STATE.currentScreen === 'splash' || STATE.currentScreen === 'loading') return;
@@ -2079,11 +2104,11 @@
       // S4 성공 애니메이션 띄우기
       showScreen('save-success');
 
-      // 2초간 띄운 후 자동으로 S5 회고 화면으로 안내
+      // 2.5초간 성공화면 띄운 후 자동으로 S1 홈 화면으로 복귀 (복귀 시 오늘 저장 락 발동)
       setTimeout(() => {
-        renderRetroView();
-        showScreen('retro');
-      }, 2000);
+        resetWizard();
+        showScreen('input');
+      }, 2500);
     }
 
     // -------------------------------------------------------------
@@ -2216,6 +2241,11 @@
       STATE.selectedAction = null;
 
       showToast("회고가 소중하게 기록되었습니다.");
+
+      // 회고 완료 후 자동으로 3.5초 뒤 S1 홈 화면으로 복귀 (어제 회고 시 오늘 새로운 걸음을 하도록 복귀)
+      setTimeout(() => {
+        showScreen('input');
+      }, 3500);
     }
 
     // -------------------------------------------------------------
@@ -2334,22 +2364,32 @@
       document.getElementById("rate-limit-modal").classList.remove("active");
     }
 
-    // 오늘 날짜 행동 완료 여부 감지 및 가이드 락 노출 제어
-    function checkTodayCompletedLock() {
+    // 오늘 날짜 행동 완료 여부 감지 및 가이드 락 노출 제어 (배너 및 오늘 잠금 분기 처리)
+    function checkDailyBranchAndRender() {
       const records = getRecords();
       const todayStr = getTodayString();
-      // 오늘 날짜이면서 status가 pending(진행중)이 아닌 완료된 회고가 있는지 검사
-      const todayDone = records.find(r => r.date === todayStr && r.status !== 'pending');
       
-      const lockEl = document.getElementById("today-completed-lock");
+      const bannerEl = document.getElementById("retro-missing-banner");
+      const lockEl = document.getElementById("today-saved-lock");
       const contentEl = document.getElementById("direction-wizard-content");
       
-      if (todayDone) {
+      // 초기 상태 리셋
+      if (bannerEl) bannerEl.style.display = "none";
+      if (lockEl) lockEl.style.display = "none";
+      if (contentEl) contentEl.style.display = "block";
+
+      // [분기 1] 어제 이전 기록 중 회고(status)가 'pending'인 항목이 존재하면 S1 상단 배너 표시
+      const pendingRecord = records.find(r => r.date !== todayStr && r.status === 'pending');
+      if (pendingRecord) {
+        if (bannerEl) bannerEl.style.display = "flex";
+      }
+
+      // [분기 2] 오늘 날짜로 저장된 행동(pending 또는 완료 모두 포함)이 이미 존재하면 오늘 잠금 노출
+      const todayRecord = records.find(r => r.date === todayStr);
+      if (todayRecord) {
         if (lockEl) lockEl.style.display = "block";
         if (contentEl) contentEl.style.display = "none";
-      } else {
-        if (lockEl) lockEl.style.display = "none";
-        if (contentEl) contentEl.style.display = "block";
+        if (bannerEl) bannerEl.style.display = "none"; // 오늘 잠금이 최우선이므로 배너 숨김
       }
     }
 
