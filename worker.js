@@ -9,25 +9,27 @@ const localCache = new Map();
 
 export default {
   async fetch(request, env, ctx) {
+    // 요청자 Origin 파악 및 CORS 템플릿 설정 (동적 Origin Echo 지원)
+    const requestOrigin = request.headers.get("Origin") || "*";
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": requestOrigin,
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Max-Age": "86400",
+      "Content-Type": "application/json"
+    };
+
     // 1. CORS 프리플라이트 처리
     if (request.method === "OPTIONS") {
       return new Response(null, {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type",
-          "Access-Control-Max-Age": "86400"
-        }
+        headers: corsHeaders
       });
     }
 
     if (request.method !== "POST") {
       return new Response(JSON.stringify({ error: "Post method required" }), {
         status: 405,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        }
+        headers: corsHeaders
       });
     }
 
@@ -73,10 +75,7 @@ export default {
           JSON.stringify({ error: "오늘의 무료 질문은 끝났습니다. 내일 다시 와주세요!" }),
           {
             status: 429,
-            headers: {
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*"
-            }
+            headers: corsHeaders
           }
         );
       }
@@ -99,10 +98,7 @@ export default {
           JSON.stringify({ error: "서버 오류: 백엔드에 Claude API Key가 설정되지 않았습니다." }),
           {
             status: 500,
-            headers: {
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*"
-            }
+            headers: corsHeaders
           }
         );
       }
@@ -162,10 +158,7 @@ prev_result가 있으면 참고해 다음 추천에 반영합니다.
 
       return new Response(cleanedJson, {
         status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        }
+        headers: corsHeaders
       });
 
     } catch (err) {
@@ -173,10 +166,7 @@ prev_result가 있으면 참고해 다음 추천에 반영합니다.
         JSON.stringify({ error: `추천 엔진 오류: ${err.message}` }),
         {
           status: 500,
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-          }
+          headers: corsHeaders
         }
       );
     }
