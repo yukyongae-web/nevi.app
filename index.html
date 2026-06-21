@@ -1302,7 +1302,7 @@
         <div class="nav-icon">📝</div>
         <div>지난 기록</div>
       </div>
-      <div class="nav-item" data-target="settings">
+      <div class="nav-item" data-target="settings" id="nav-item-settings" style="display: none;">
         <div class="nav-icon">⚙️</div>
         <div>설정</div>
       </div>
@@ -1446,6 +1446,16 @@
         localStorage.setItem(STORAGE_KEYS.DEVICE_ID, deviceId);
       }
 
+      // URL 파라미터 검사하여 admin 설정 활성화
+      const urlParams = new URLSearchParams(window.location.search);
+      const isAdmin = urlParams.get('admin') === 'true' || urlParams.get('setting') === 'true';
+      if (isAdmin) {
+        const settingsNavItem = document.getElementById("nav-item-settings");
+        if (settingsNavItem) {
+          settingsNavItem.style.display = "flex";
+        }
+      }
+
       // 스플래시 화면 노출 여부 체크
       const hasVisited = localStorage.getItem(STORAGE_KEYS.VISITED);
       if (hasVisited === 'true') {
@@ -1462,14 +1472,36 @@
       }
     }
 
+    // 이스터 에그용 카운터 변수
+    let logoClickCount = 0;
+    let logoClickTimeout = null;
+
     // -------------------------------------------------------------
     // 이벤트 리스너 등록
     // -------------------------------------------------------------
     function setupEventListeners() {
-      // 로고 클릭 시 처음 화면(홈)으로 이동
+      // 로고 클릭 시 처음 화면(홈)으로 이동 + 5회 연타 시 이스터 에그 설정 진입
       document.getElementById("app-logo-home").addEventListener("click", () => {
         if (STATE.currentScreen === 'splash' || STATE.currentScreen === 'loading') return;
         
+        logoClickCount++;
+        clearTimeout(logoClickTimeout);
+        logoClickTimeout = setTimeout(() => {
+          logoClickCount = 0;
+        }, 3000); // 3초 내 추가 탭이 없으면 카운트 리셋
+
+        if (logoClickCount >= 5) {
+          logoClickCount = 0;
+          const settingsNavItem = document.getElementById("nav-item-settings");
+          if (settingsNavItem) {
+            settingsNavItem.style.display = "flex"; // 숨겨진 설정 메뉴 활성화
+          }
+          renderSettingsView();
+          showScreen('settings');
+          showToast("⚙️ 운영자 설정 화면이 활성화되었습니다.");
+          return;
+        }
+
         const records = getRecords();
         const activeAction = records.find(r => r.status === 'pending');
         
