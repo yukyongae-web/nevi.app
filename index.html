@@ -950,6 +950,93 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
+
+    /* 홈 화면 특화 스타일 */
+    .home-card {
+      position: relative;
+      width: 100%;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      margin-bottom: 16px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      box-sizing: border-box;
+    }
+
+    .home-card.active {
+      border-color: rgba(124, 106, 247, 0.4);
+    }
+
+    .home-card.active:hover {
+      border-color: rgba(124, 106, 247, 0.6);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124, 106, 247, 0.15);
+    }
+
+    .home-card.inactive {
+      opacity: 0.4;
+    }
+
+    .card-emoji {
+      font-size: 36px;
+      margin-bottom: 12px;
+      line-height: 1;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 15px;
+      color: #C8C5E8;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .btn-home-start {
+      background-color: #7C6AF7;
+      color: #FFFFFF;
+      height: 48px;
+      border-radius: 100px;
+      width: 100%;
+      font-size: 18px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .btn-home-start:hover:not(:disabled) {
+      background-color: #9687FA;
+      box-shadow: 0 0 12px rgba(124, 106, 247, 0.4);
+    }
+
+    .btn-home-start:disabled {
+      cursor: not-allowed;
+    }
+
+    .red-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 8px;
+      height: 8px;
+      background-color: var(--danger-color);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--danger-color);
+    }
   </style>
 </head>
 <body>
@@ -964,8 +1051,35 @@
       <div class="app-subtitle">AI 인생 내비게이터</div>
     </header>
 
+    <!-- S8. 홈 화면 -->
+    <section class="screen active" id="screen-home">
+      <!-- 상단 -->
+      <div class="home-header" style="text-align: center; margin-bottom: 32px; margin-top: 16px;">
+        <div class="home-logo" id="home-logo-title" style="font-size: 32px; font-weight: 700; background: linear-gradient(135deg, #FFF, var(--primary-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
+          <span class="app-logo-dot" style="width: 12px; height: 12px;"></span>NEVI
+        </div>
+        <p class="home-slogan" style="font-size: 16px; color: var(--primary-color); font-weight: 500; margin-top: 8px;">AI와 함께 찾는 다음 한 걸음</p>
+      </div>
+
+      <!-- 메인 버튼 2개 (세로 배치) -->
+      <div class="home-card" id="card-retro">
+        <div class="red-badge" id="badge-retro" style="display: none;"></div>
+        <div class="card-emoji">🔁</div>
+        <div class="card-title">이전 걸음 회고</div>
+        <div class="card-desc">지난 걸음을 돌아봐요</div>
+        <button class="btn-home-start" id="btn-retro-start">시작하기</button>
+      </div>
+
+      <div class="home-card" id="card-commit">
+        <div class="card-emoji">👣</div>
+        <div class="card-title">오늘 걸음 약속</div>
+        <div class="card-desc">오늘의 다음 한 걸음을 찾아요</div>
+        <button class="btn-home-start" id="btn-commit-start">시작하기</button>
+      </div>
+    </section>
+
     <!-- S0. 스플래시 화면 -->
-    <section class="screen active" id="screen-splash">
+    <section class="screen" id="screen-splash">
       <div class="splash-container">
         <div class="splash-logo">🧭</div>
         <h1 class="splash-title">NEVI</h1>
@@ -989,24 +1103,6 @@
 
       <!-- Step 1: 방향 선택 -->
       <div class="step-container active" id="step-direction">
-        <!-- 미회고 알림 배너 (분기 1) -->
-        <div id="retro-missing-banner" style="display: none; background: rgba(124, 106, 247, 0.12); border: 1px solid var(--primary-color); border-radius: 16px; padding: 18px; margin-bottom: 24px; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(124, 106, 247, 0.15); animation: fadeIn 0.4s ease-out;">
-          <div style="font-size: 18px; font-weight: 500; color: var(--text-main); word-break: keep-all; line-height: 1.5; flex: 1; padding-right: 12px; text-align: left;">
-            🧭 지난번에 저장한 한 걸음이 있습니다. 지금 실천해보셨나요?
-          </div>
-          <button class="btn btn-primary" id="btn-banner-retro" style="width: auto; height: 42px; font-size: 16px; padding: 0 16px; border-radius: 10px; box-shadow: none;">회고하기</button>
-        </div>
-
-        <!-- 오늘 이미 저장한 경우 노출할 잠금 화면 (분기 2) -->
-        <div id="today-saved-lock" style="display: none; text-align: center; padding: 40px 10px;">
-          <div style="font-size: 64px; margin-bottom: 24px;">✅</div>
-          <h2 style="font-size: 26px; color: var(--success-color); margin-bottom: 16px; word-break: keep-all;">오늘의 한 걸음은 이미 저장했어요</h2>
-          <p class="description-text" style="color: var(--text-main); font-size: 19px; font-weight: 500; line-height: 1.6; word-break: keep-all; margin-bottom: 32px;">
-            내일 다시 만나요. 오늘 해보고 어땠는지 알려주세요 🌱
-          </p>
-          <button class="btn btn-primary" id="btn-lock-go-history" style="height: 52px; font-size: 18px;">지난 기록 보기</button>
-        </div>
-
         <div id="direction-wizard-content">
           <h2>어떤 방향으로 나아가고 싶으신가요?</h2>
           <p class="description-text">현재 가장 관심이 가는 한 가지를 선택해 주세요.</p>
@@ -1317,12 +1413,12 @@
 
     <!-- 하단 고정 탭 바 -->
     <nav class="nav-bar" id="app-nav-bar">
-      <div class="nav-item active" data-target="action">
-        <div class="nav-icon">🧭</div>
-        <div>오늘의 행동</div>
+      <div class="nav-item active" data-target="home">
+        <div class="nav-icon">🏠</div>
+        <div>홈</div>
       </div>
       <div class="nav-item" data-target="history">
-        <div class="nav-icon">📝</div>
+        <div class="nav-icon">📋</div>
         <div>지난 기록</div>
       </div>
       <div class="nav-item" data-target="settings" id="nav-item-settings" style="display: none;">
@@ -1469,8 +1565,14 @@
         localStorage.setItem(STORAGE_KEYS.DEVICE_ID, deviceId);
       }
 
-      // URL 파라미터 검사하여 admin 설정 활성화
+      // URL 파라미터 검사하여 전체 초기화 (테스트용)
       const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('clear_records') === 'true') {
+        localStorage.clear();
+        window.location.href = window.location.pathname;
+        return;
+      }
+
       const isAdmin = urlParams.get('admin') === 'true' || urlParams.get('setting') === 'true';
       if (isAdmin) {
         const settingsNavItem = document.getElementById("nav-item-settings");
@@ -1479,23 +1581,9 @@
         }
       }
 
-      // 오늘 날짜 행동 완료 시 잠금 및 배너 제어 초기 구동
-      checkDailyBranchAndRender();
-
-      // 스플래시 화면 노출 여부 체크
-      const hasVisited = localStorage.getItem(STORAGE_KEYS.VISITED);
-      if (hasVisited === 'true') {
-        // 이미 방문한 경우 S1 상태 입력 화면으로 바로 진입
-        document.getElementById("app-header").style.display = "flex";
-        showScreen('input');
-        
-        // 만약 로컬스토리지에 진행 중인(회고하지 않은) 오늘 날짜 기록이 있다면 회고로 바로 보냅니다.
-        checkActiveAction();
-      } else {
-        // 첫 방문자인 경우 S0 스플래시 노출
-        document.getElementById("app-header").style.display = "none";
-        showScreen('splash');
-      }
+      // 홈 화면 렌더링 및 홈 화면으로 이동 (기존 자동 분기 제거)
+      renderHomeView();
+      showScreen('home');
     }
 
     // 이스터 에그용 카운터 변수
@@ -1506,29 +1594,26 @@
     // 이벤트 리스너 등록
     // -------------------------------------------------------------
     function setupEventListeners() {
-      // 미회고 배너의 [회고하기] 클릭 시 S5 회고 이동
-      document.getElementById("btn-banner-retro").addEventListener("click", () => {
-        const records = getRecords();
-        const todayStr = getTodayString();
-        const pendingRecord = records.find(r => r.date !== todayStr && r.status === 'pending');
-        
-        if (pendingRecord) {
-          STATE.activeAction = pendingRecord;
-          renderRetroView();
-          showScreen('retro');
-        }
+      // [🔁 이전 걸음 회고] 시작하기 클릭
+      document.getElementById("btn-retro-start").addEventListener("click", (e) => {
+        e.stopPropagation();
+        handleRetroCardClick();
+      });
+      document.getElementById("card-retro").addEventListener("click", () => {
+        handleRetroCardClick();
       });
 
-      // 오늘 완료 락 카드 내의 [지난 기록 보기] 클릭 시 S6 이동
-      document.getElementById("btn-lock-go-history").addEventListener("click", () => {
-        const historyTab = document.querySelector('.nav-item[data-target="history"]');
-        if (historyTab) {
-          historyTab.click();
-        }
+      // [👣 오늘 걸음 약속] 시작하기 클릭
+      document.getElementById("btn-commit-start").addEventListener("click", (e) => {
+        e.stopPropagation();
+        handleCommitCardClick();
+      });
+      document.getElementById("card-commit").addEventListener("click", () => {
+        handleCommitCardClick();
       });
 
       // 로고 클릭 시 처음 화면(홈)으로 이동 + 5회 연타 시 이스터 에그 설정 진입
-      document.getElementById("app-logo-home").addEventListener("click", () => {
+      const handleLogoClick = () => {
         if (STATE.currentScreen === 'splash' || STATE.currentScreen === 'loading') return;
         
         logoClickCount++;
@@ -1549,24 +1634,14 @@
           return;
         }
 
-        const records = getRecords();
-        const activeAction = records.find(r => r.status === 'pending');
-        
-        if (activeAction) {
-          if (confirm("현재 진행 중인 오늘 행동이 있습니다. 처음으로 돌아가 새로운 행동을 탐색하시겠습니까?\n(기존 진행 중인 행동은 목록에서 삭제됩니다.)")) {
-            const filtered = records.filter(r => r.status !== 'pending');
-            saveRecords(filtered);
-            STATE.activeAction = null;
-            resetWizard();
-            showScreen('input');
-            showToast("초기 화면으로 이동했습니다.");
-          }
-        } else {
-          resetWizard();
-          showScreen('input');
-          showToast("초기 화면으로 이동했습니다.");
-        }
-      });
+        resetWizard();
+        renderHomeView();
+        showScreen('home');
+        showToast("홈 화면으로 이동했습니다.");
+      };
+
+      document.getElementById("app-logo-home").addEventListener("click", handleLogoClick);
+      document.getElementById("home-logo-title").addEventListener("click", handleLogoClick);
 
       // 지난 기록 전체 초기화 (일반 사용자용)
       document.getElementById("btn-history-clear").addEventListener("click", () => {
@@ -1583,15 +1658,15 @@
           showToast("모든 기록이 삭제되었습니다.");
           
           renderHistoryView();
-          checkActiveAction();
+          renderHomeView();
         }
       });
 
       // S0: 스플래시 시작하기
       document.getElementById("btn-splash-start").addEventListener("click", () => {
         localStorage.setItem(STORAGE_KEYS.VISITED, 'true');
-        document.getElementById("app-header").style.display = "flex";
-        showScreen('input');
+        renderHomeView();
+        showScreen('home');
       });
 
       // S1: 라디오 카드 및 체크박스 카드 스타일 바인딩
@@ -1659,23 +1734,9 @@
           navItems.forEach(nav => nav.classList.remove("active"));
           item.classList.add("active");
 
-          if (target === 'action') {
-            // 오늘의 행동 탭 분기 처리
-            const records = getRecords();
-            const activeAction = records.find(r => r.status === 'pending');
-            
-            if (activeAction) {
-              // 진행 중인 행동이 있으면 S5 회고 화면 노출
-              STATE.activeAction = activeAction;
-              renderRetroView();
-              showScreen('retro');
-            } else if (STATE.recommendedActions.length > 0 && !STATE.selectedAction) {
-              // 추천 결과는 있는데 아직 선택 안 한 상태면 S3
-              showScreen('result');
-            } else {
-              // 진행 중인 것도 없고 추천도 없으면 상태 입력 S1
-              showScreen('input');
-            }
+          if (target === 'home') {
+            renderHomeView();
+            showScreen('home');
           } else if (target === 'history') {
             renderHistoryView();
             showScreen('history');
@@ -1717,11 +1778,6 @@
     // 화면 전환 제어 함수
     // -------------------------------------------------------------
     function showScreen(screenId) {
-      // S1 입력 화면 전환 시 오늘 완료 잠금 여부 상태 체크
-      if (screenId === 'input') {
-        checkTodayCompletedLock();
-      }
-
       // 모든 화면 비활성화
       const screens = document.querySelectorAll(".screen");
       screens.forEach(s => s.classList.remove("active"));
@@ -1731,6 +1787,14 @@
       if (targetScreen) {
         targetScreen.classList.add("active");
         STATE.currentScreen = screenId;
+      }
+
+      // 앱 헤더 노출 제어 (홈, 스플래시, 로딩, 저장 완료 화면에서는 숨김)
+      const appHeader = document.getElementById("app-header");
+      if (screenId === 'home' || screenId === 'splash' || screenId === 'loading' || screenId === 'save-success') {
+        appHeader.style.display = "none";
+      } else {
+        appHeader.style.display = "flex";
       }
 
       // 하단 네비바 노출 제어 (스플래시, 로딩, 저장 완료 화면에서는 네비바 숨김)
@@ -1744,12 +1808,15 @@
         const navItems = document.querySelectorAll(".nav-item");
         navItems.forEach(item => item.classList.remove("active"));
         
-        if (screenId === 'input' || screenId === 'result' || screenId === 'retro') {
-          document.querySelector('.nav-item[data-target="action"]').classList.add("active");
+        if (screenId === 'home' || screenId === 'input' || screenId === 'result' || screenId === 'retro') {
+          const homeNavItem = document.querySelector('.nav-item[data-target="home"]');
+          if (homeNavItem) homeNavItem.classList.add("active");
         } else if (screenId === 'history') {
-          document.querySelector('.nav-item[data-target="history"]').classList.add("active");
+          const historyNavItem = document.querySelector('.nav-item[data-target="history"]');
+          if (historyNavItem) historyNavItem.classList.add("active");
         } else if (screenId === 'settings') {
-          document.querySelector('.nav-item[data-target="settings"]').classList.add("active");
+          const settingsNavItem = document.querySelector('.nav-item[data-target="settings"]');
+          if (settingsNavItem) settingsNavItem.classList.add("active");
         }
       }
       
@@ -2104,10 +2171,11 @@
       // S4 성공 애니메이션 띄우기
       showScreen('save-success');
 
-      // 2.5초간 성공화면 띄운 후 자동으로 S1 홈 화면으로 복귀 (복귀 시 오늘 저장 락 발동)
+      // 2.5초간 성공화면 띄운 후 자동으로 홈 화면으로 복귀
       setTimeout(() => {
         resetWizard();
-        showScreen('input');
+        renderHomeView();
+        showScreen('home');
       }, 2500);
     }
 
@@ -2242,9 +2310,10 @@
 
       showToast("회고가 소중하게 기록되었습니다.");
 
-      // 회고 완료 후 자동으로 3.5초 뒤 S1 홈 화면으로 복귀 (어제 회고 시 오늘 새로운 걸음을 하도록 복귀)
+      // 회고 완료 후 자동으로 3.5초 뒤 홈 화면으로 복귀
       setTimeout(() => {
-        showScreen('input');
+        renderHomeView();
+        showScreen('home');
       }, 3500);
     }
 
@@ -2329,19 +2398,72 @@
     }
 
     // -------------------------------------------------------------
-    // Helper: 오늘 진행중인 행동 검출
+    // 홈 화면 렌더링 및 카드 상태 갱신 로직
     // -------------------------------------------------------------
-    function checkActiveAction() {
+    function renderHomeView() {
       const records = getRecords();
-      const activeAction = records.find(r => r.status === 'pending');
+      const todayStr = getTodayString();
       
-      if (activeAction) {
-        STATE.activeAction = activeAction;
-        renderRetroView();
-        showScreen('retro');
+      // Card A: 이전 걸음 회고
+      const pendingRecords = records.filter(r => r.status === 'pending');
+      const cardRetro = document.getElementById("card-retro");
+      const btnRetroStart = document.getElementById("btn-retro-start");
+      const badgeRetro = document.getElementById("badge-retro");
+      
+      if (pendingRecords.length > 0) {
+        cardRetro.classList.add("active");
+        cardRetro.classList.remove("inactive");
+        cardRetro.style.cursor = "pointer";
+        btnRetroStart.disabled = false;
+        if (badgeRetro) badgeRetro.style.display = "block";
       } else {
-        showScreen('input');
+        cardRetro.classList.remove("active");
+        cardRetro.classList.add("inactive");
+        cardRetro.style.cursor = "default";
+        btnRetroStart.disabled = true;
+        if (badgeRetro) badgeRetro.style.display = "none";
       }
+
+      // Card B: 오늘 걸음 약속
+      const todayRecord = records.find(r => r.date === todayStr);
+      const cardCommit = document.getElementById("card-commit");
+      const btnCommitStart = document.getElementById("btn-commit-start");
+      
+      if (!todayRecord) {
+        cardCommit.classList.add("active");
+        cardCommit.classList.remove("inactive");
+        cardCommit.style.cursor = "pointer";
+        btnCommitStart.disabled = false;
+        btnCommitStart.textContent = "시작하기";
+      } else {
+        cardCommit.classList.remove("active");
+        cardCommit.classList.add("inactive");
+        cardCommit.style.cursor = "default";
+        btnCommitStart.disabled = true;
+        btnCommitStart.textContent = "오늘 완료 ✓";
+      }
+    }
+
+    function handleRetroCardClick() {
+      const records = getRecords();
+      const pendingRecords = records.filter(r => r.status === 'pending');
+      if (pendingRecords.length === 0) return; // 비활성 상태면 클릭 안 됨
+
+      // 가장 최근 미완료 기록을 S5 회고 대상으로 사용
+      const targetRecord = pendingRecords[pendingRecords.length - 1];
+      STATE.activeAction = targetRecord;
+      renderRetroView();
+      showScreen('retro');
+    }
+
+    function handleCommitCardClick() {
+      const records = getRecords();
+      const todayStr = getTodayString();
+      const todayRecord = records.find(r => r.date === todayStr);
+      if (todayRecord) return; // 오늘 이미 저장했으면 클릭 안 됨
+
+      resetWizard();
+      showScreen('input');
     }
 
     // -------------------------------------------------------------
@@ -2355,42 +2477,14 @@
       }
       modal.classList.add("active");
       
-      // 로딩 창을 끄고 입력(홈)으로 복원
-      showScreen('input');
+      // 로딩 창을 끄고 홈 화면으로 복원
+      renderHomeView();
+      showScreen('home');
       resetWizard();
     }
 
     function closeRateLimitModal() {
       document.getElementById("rate-limit-modal").classList.remove("active");
-    }
-
-    // 오늘 날짜 행동 완료 여부 감지 및 가이드 락 노출 제어 (배너 및 오늘 잠금 분기 처리)
-    function checkDailyBranchAndRender() {
-      const records = getRecords();
-      const todayStr = getTodayString();
-      
-      const bannerEl = document.getElementById("retro-missing-banner");
-      const lockEl = document.getElementById("today-saved-lock");
-      const contentEl = document.getElementById("direction-wizard-content");
-      
-      // 초기 상태 리셋
-      if (bannerEl) bannerEl.style.display = "none";
-      if (lockEl) lockEl.style.display = "none";
-      if (contentEl) contentEl.style.display = "block";
-
-      // [분기 1] 어제 이전 기록 중 회고(status)가 'pending'인 항목이 존재하면 S1 상단 배너 표시
-      const pendingRecord = records.find(r => r.date !== todayStr && r.status === 'pending');
-      if (pendingRecord) {
-        if (bannerEl) bannerEl.style.display = "flex";
-      }
-
-      // [분기 2] 오늘 날짜로 저장된 행동(pending 또는 완료 모두 포함)이 이미 존재하면 오늘 잠금 노출
-      const todayRecord = records.find(r => r.date === todayStr);
-      if (todayRecord) {
-        if (lockEl) lockEl.style.display = "block";
-        if (contentEl) contentEl.style.display = "none";
-        if (bannerEl) bannerEl.style.display = "none"; // 오늘 잠금이 최우선이므로 배너 숨김
-      }
     }
 
     // -------------------------------------------------------------
@@ -2412,10 +2506,13 @@
     }
 
     function getTodayString() {
+      // 한국 표준시 (KST, UTC+9) 기준으로 정확한 YYYY-MM-DD 날짜 계산
       const now = new Date();
-      const yyyy = now.getFullYear();
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const dd = String(now.getDate()).padStart(2, '0');
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const kstTime = new Date(utc + (9 * 60 * 60 * 1000));
+      const yyyy = kstTime.getFullYear();
+      const mm = String(kstTime.getMonth() + 1).padStart(2, '0');
+      const dd = String(kstTime.getDate()).padStart(2, '0');
       return `${yyyy}-${mm}-${dd}`;
     }
 
