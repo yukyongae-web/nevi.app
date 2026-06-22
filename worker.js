@@ -69,8 +69,9 @@ export default {
         devCount = localCache.get(devKey) || 0;
       }
 
-      // 6. 하루 호출 한도 초과 체크 (IP 또는 Device ID 중 하나라도 초과 시 차단)
-      if (ipCount >= DAILY_LIMIT || devCount >= DAILY_LIMIT) {
+      // 6. 하루 호출 한도 초과 체크 (IP 또는 Device ID 중 하나라도 초과 시 차단, 로컬호스트 환경은 디버깅을 위해 제외)
+      const isLocalhost = ip === "127.0.0.1" || ip === "::1" || ip === "unknown_ip" || ip.startsWith("localhost");
+      if (!isLocalhost && (ipCount >= DAILY_LIMIT || devCount >= DAILY_LIMIT)) {
         return new Response(
           JSON.stringify({ error: "오늘의 무료 질문은 끝났습니다. 내일 다시 와주세요!" }),
           {

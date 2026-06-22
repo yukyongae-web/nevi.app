@@ -2415,12 +2415,15 @@
         cardRetro.classList.remove("inactive");
         cardRetro.style.cursor = "pointer";
         btnRetroStart.disabled = false;
+        btnRetroStart.textContent = "시작하기";
         if (badgeRetro) badgeRetro.style.display = "block";
       } else {
         cardRetro.classList.remove("active");
         cardRetro.classList.add("inactive");
         cardRetro.style.cursor = "default";
         btnRetroStart.disabled = true;
+        const hasCompletedRecords = records.length > 0 && pendingRecords.length === 0;
+        btnRetroStart.textContent = hasCompletedRecords ? "회고 완료" : "시작하기";
         if (badgeRetro) badgeRetro.style.display = "none";
       }
 
