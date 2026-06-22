@@ -1435,10 +1435,10 @@
   <!-- 한도 초과(무료 질문 소진) 안내 모달 -->
   <div class="modal-overlay" id="rate-limit-modal">
     <div class="modal-content" style="text-align: center;">
-      <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
-      <h3 class="modal-title" style="color: var(--primary-color);">알림</h3>
+      <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+      <h3 class="modal-title" style="color: var(--primary-color);">오늘의 한 걸음 완료!</h3>
       <p class="modal-desc" id="rate-limit-error-msg" style="font-size: 20px; font-weight: 700; line-height: 1.6; word-break: keep-all; color: var(--text-main); margin-bottom: 24px;">
-        오늘의 무료 질문은 끝났습니다.<br>내일 다시 와주세요!
+        오늘 걸음 약속이 저장되었어요.<br>내일 다시 오셔서 약속을 회고하시고<br>한 걸음 더 나아가세요.
       </p>
       
       <button class="btn btn-primary" id="btn-rate-limit-close">확인</button>
@@ -1968,7 +1968,7 @@
         document.getElementById("result-context-text").textContent = apiResult.context || "당신만을 위한 다음 한 걸음 제안입니다.";
       } catch (err) {
         // 하루 호출 제한(Rate Limit)을 넘었을 경우, 친절하게 안내 문구 노출 및 로컬 폴백 회피
-        if (err.message.includes("오늘의 무료 질문")) {
+        if (err.message.includes("오늘 걸음 약속이 저장되었어요")) {
           showRateLimitModal(err.message);
           return;
         }

@@ -73,7 +73,7 @@ export default {
       const isLocalhost = ip === "127.0.0.1" || ip === "::1" || ip === "unknown_ip" || ip.startsWith("localhost");
       if (!isLocalhost && (ipCount >= DAILY_LIMIT || devCount >= DAILY_LIMIT)) {
         return new Response(
-          JSON.stringify({ error: "오늘의 무료 질문은 끝났습니다. 내일 다시 와주세요!" }),
+          JSON.stringify({ error: "오늘 걸음 약속이 저장되었어요. 내일 다시 오셔서 약속을 회고하시고 한 걸음 더 나아가세요." }),
           {
             status: 429,
             headers: corsHeaders
